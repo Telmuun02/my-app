@@ -1,0 +1,14 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Хуучин туршилтын файлууд (Laravel-тай холбоогүй)
+/database.php
+/index.php
+
+# Backend/Frontend дотор өөр өөрийн .gitignore-той тул
+# node_modules, vendor, .env зэрэг тэндээсээ автоматаар орхигдоно.
