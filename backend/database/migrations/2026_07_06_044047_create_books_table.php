@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('title');
             $table->string('isbn')->unique();
             $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
+            $table->foreignId('company_id')->constrained('companies')->onDelete('cascade');
             $table->integer('total_copies');
             $table->integer('available_copies');
             $table->timestamps();

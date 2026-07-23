@@ -7,6 +7,7 @@ use Illuminate\Database\Seeder;
 use App\Models\Book;
 use App\Models\Category;
 use App\Models\Author;
+use App\Models\Company;
 
 class BookSeeder extends Seeder
 {
@@ -33,6 +34,7 @@ class BookSeeder extends Seeder
                 'title'            => $data['title'],
                 'isbn'             => $data['isbn'],
                 'category_id'      => Category::where('name', $data['category'])->value('id'),
+                'company_id'       => Company::inRandomOrder()->value('id'),
                 'total_copies'     => $data['copies'],
                 'available_copies' => $data['copies'],
             ]);

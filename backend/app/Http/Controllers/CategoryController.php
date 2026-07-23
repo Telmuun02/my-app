@@ -9,6 +9,12 @@ class CategoryController extends Controller
 {
     public function index()
     {
+        // 1. paginate - хуудаслалттай хийх 
+        // limit - 100
+        // page - 2
+        // 2. seeder + factory - 100 ангилал үүсгэх || 
+        // Facade => software design pattern || architecture
+        // unique => үүсэхэд Log бичдэг болгох || INFO, ERROR, WARNING, DEBUG, TRACE
         return response()->json(Category::all());
     }
 
@@ -25,7 +31,6 @@ class CategoryController extends Controller
 
     public function show(Category $category)
     {
-        // Route model binding: {category} id-г Laravel өөрөө олж $category-д өгнө
         return response()->json($category->load('books'));
     }
 
