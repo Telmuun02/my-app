@@ -18,6 +18,7 @@ class CategoryController extends Controller
         return response()->json(Category::all());
     }
 
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -29,10 +30,12 @@ class CategoryController extends Controller
         return response()->json($category, 201);
     }
 
+
     public function show(Category $category)
     {
         return response()->json($category->load('books'));
     }
+
 
     public function update(Request $request, Category $category)
     {
@@ -44,6 +47,7 @@ class CategoryController extends Controller
 
         return response()->json($category);
     }
+
 
     public function destroy(Category $category)
     {
