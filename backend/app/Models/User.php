@@ -30,4 +30,12 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Хэрэглэгчийн харьяалагдах компани (нэг user → нэг company).
+     */
+    public function company()
+    {
+        return $this->belongsTo(Company::class, 'company_id', 'id');
+    }
 }

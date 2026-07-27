@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Author;
 use App\Models\Book;
 use App\Models\Category;
 use App\Models\Company;
@@ -29,5 +30,17 @@ class BookFactory extends Factory
             'total_copies'     => $totalCopies,
             'available_copies' => fake()->numberBetween(0, $totalCopies),
         ];
+    }
+
+    /**
+     * Ном үүссэний ДАРАА ажиллах callback — санамсаргүй зохиолч холбоно.
+     */
+    public function configure(): static
+    {
+        return $this->afterCreating(function (Book $book) {
+            // Байгаа зохиолчдоос 1-3-ыг санамсаргүй сонгож author_book pivot-д холбоно
+            $authorIds = Author::inRandomOrder()->take(rand(1, 3))->pluck('id');
+            $book->authors()->attach($authorIds);
+        });
     }
 }

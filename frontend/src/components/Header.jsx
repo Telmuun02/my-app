@@ -28,7 +28,9 @@ function Header({ query, onQueryChange, onNavigate, user, onLogout }) {
         {user ? (
           // Нэвтэрсэн үед: нэр + Sign out
           <>
-            <span className="header__user">{user.name}</span>
+            <span className="header__user">
+              {user.company?.name ? `${user.company.name} · ${user.name}` : user.name}
+            </span>
             <button type="button" className="btn-text" onClick={onLogout}>
               Sign out
             </button>

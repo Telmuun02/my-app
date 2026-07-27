@@ -8,6 +8,7 @@ function Register({ onNavigate, onAuth }) {
   const [form, setForm] = useState({
     name: "",
     email: "",
+    company_id: "",
     password: "",
     password_confirmation: "",
   });
@@ -54,6 +55,11 @@ function Register({ onNavigate, onAuth }) {
         <label className="field">
           <span className="field__label">Email address</span>
           <input name="email" type="email" value={form.email} onChange={update} placeholder="you@example.com" />
+        </label>
+
+        <label className="field">
+          <span className="field__label">Company ID</span>
+          <input name="company_id" type="number" value={form.company_id} onChange={update} placeholder="3" />
         </label>
 
         <label className="field">

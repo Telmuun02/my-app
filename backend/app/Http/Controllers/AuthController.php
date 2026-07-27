@@ -16,33 +16,36 @@ class AuthController extends Controller
     {
         
         $validated = $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed', // password_confirmation талбар шаардана
+            'name'       => 'required|string|max:255',
+            'email'      => 'required|string|email|max:255|unique:users',
+            'password'   => 'required|string|min:8|confirmed', // password_confirmation талбар шаардана
+            'company_id' => 'required|exists:companies,id',    // байгаа компанийг заасан эсэхийг шалгана
         ]);
 
-        // DEBUG — хөгжүүлэлтийн дэлгэрэнгүй мэдээлэл (хүсэлт ирснийг тэмдэглэнэ).
+        // Debug log.
         Log::debug('Бүртгэлийн хүсэлт боловсруулж байна.', [
             'email' => $validated['email'],
         ]);
 
+        // aldaa oloh
         try {
             $user = User::create([
-                'name'     => $validated['name'],
-                'email'    => $validated['email'],
-                'password' => Hash::make($validated['password']),
+                'name'       => $validated['name'],
+                'email'      => $validated['email'],
+                'password'   => Hash::make($validated['password']),
+                'company_id' => $validated['company_id'],
             ]);
 
             $token = $user->createToken('auth_token')->plainTextToken;
         } catch (UniqueConstraintViolationException $e) {
-            // Email давхцал DB түвшинд — validation-ийг давсан ховор тохиолдол (жишээ нь зэрэг хүсэлт).
+            // Email davhtsval.
             Log::warning('Бүртэлтэй и-мэйл байна.', [
                 'email' => $validated['email'],
             ]);
 
             return response()->json(['message' => 'Энэ и-мэйл аль хэдийн бүртгэлтэй байна.'], 409);
         } catch (QueryException $e) {
-            // Өгөгдлийн сангийн бусад алдаа — холбогдохгүй байх, constraint зөрчил гэх мэт.
+            // Busad aldaa.
             Log::error('Хэрэглэгч бүртгэхэд өгөгдлийн сангийн алдаа гарлаа.', [
                 'email'     => $validated['email'],
                 'exception' => $e->getMessage(),
@@ -50,7 +53,7 @@ class AuthController extends Controller
 
             return response()->json(['message' => 'Өгөгдлийн сангийн алдаа гарлаа.'], 500);
         } catch (\Throwable $e) {
-            // Бусад бүх гэнэтийн алдаа.
+            // Throw hiisen aldaa.
             Log::error('Алдаа гарлаа.', [
                 'email'     => $validated['email'],
                 'exception' => $e->getMessage(),
@@ -59,14 +62,14 @@ class AuthController extends Controller
             return response()->json(['message' => 'Хэрэглэгч үүсгэхэд алдаа гарлаа.'], 500);
         }
 
-        // INFO — амжилттай, чухал үйл явдал (аудитын мөр).
+        // INFO log - user burtgesen g shalgah.
         Log::info('Шинэ хэрэглэгч бүртгэгдлээ.', [
             'user_id' => $user->id,
             'email'   => $user->email,
         ]);
 
         return response()->json([
-            'user'  => $user,
+            'user'  => $user->load('company'),   // компанийг нь хамт буцаана (шинэ user бол null)
             'token' => $token,
         ], 201);
     }
@@ -83,12 +86,13 @@ class AuthController extends Controller
             $user = User::where('email', $validated['email'])->first();
 
             if (! $user || ! Hash::check($validated['password'], $user->password)) {
-                // Амжилтгүй нэвтрэх оролдлогыг бүртгэнэ — аюулгүй байдлын log-д хэрэгтэй.
+                // Amjiltgu nevtreh uildliig ni medegdeh.
                 Log::warning('Амжилтгүй нэвтрэх оролдлого.', [
                     'email' => $validated['email'],
                     'ip'    => $request->ip(),
                 ]);
 
+                // aldaa shideh
                 throw ValidationException::withMessages([
                     'email' => ['И-мэйл эсвэл нууц үг буруу байна.'],
                 ]);
@@ -96,10 +100,10 @@ class AuthController extends Controller
 
             $token = $user->createToken('auth_token')->plainTextToken;
         } catch (ValidationException $e) {
-            // Буруу нэвтрэлт — энд бариулахгүй, Laravel-д даатгаж 422 болгоно.
+            // aldaa shideh
             throw $e;
         } catch (QueryException $e) {
-            // Өгөгдлийн сангийн алдаа — холбогдохгүй байх гэх мэт.
+            // Өгөгдлийн сангийн алдаа .
             Log::error('Нэвтрэхэд өгөгдлийн сангийн алдаа гарлаа.', [
                 'email'     => $validated['email'],
                 'exception' => $e->getMessage(),
@@ -116,14 +120,14 @@ class AuthController extends Controller
             return response()->json(['message' => 'Нэвтрэхэд алдаа гарлаа.'], 500);
         }
 
-        // INFO — амжилттай нэвтрэлт (хэн, хэзээ нэвтэрснийг тэмдэглэнэ).
+        // INFO — амжилттай нэвтрэлт
         Log::info('Хэрэглэгч нэвтэрлээ.', [
             'user_id' => $user->id,
             'email'   => $user->email,
         ]);
 
         return response()->json([
-            'user'  => $user,
+            'user'  => $user->load('company'),          
             'token' => $token,
         ]);
     }
@@ -133,8 +137,9 @@ class AuthController extends Controller
      */
     public function me(Request $request)
     {
-        // auth:sanctum middleware дамжсан бол $request->user() нь тухайн хэрэглэгч
-        return response()->json($request->user());
+        // auth:sanctum middleware дамжсан бол $request->user() нь тухайн хэрэглэгч.
+        // ard ni load('company') hiih ni company niih ni medeellig hamtad ni butsaana
+        return response()->json($request->user()->load('company'));
     }
 
     /**

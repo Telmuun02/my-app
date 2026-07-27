@@ -12,11 +12,19 @@ function BookCard({ book, user, onBorrow }) {
       <div className="card__cover" style={{ background: cover }}>
         <span className="card__cover-category">{book.category}</span>
 
-        {/* Бүдэг ном icon (чимэглэл) */}
-        <svg className="card__cover-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-          <path d="M12 6c-1.5-1-4-1.5-6-1.5S2.5 5 2 5.5v13c.5-.5 2.5-1 4-1s4.5.5 6 1.5c1.5-1 4-1.5 6-1.5s3.5.5 4 1v-13c-.5-.5-2.5-1-4-1s-4.5.5-6 1.5Z" />
-          <path d="M12 6v13" />
-        </svg>
+        {/* Номын зураг (одоохондоо бүх номд ижил placeholder) */}
+        <img
+          className="card__cover-img"
+          src="https://covers.openlibrary.org/b/isbn/9780451524935-L.jpg"
+          alt={book.title}
+          style={{
+            width: "90px",
+            height: "130px",
+            objectFit: "cover",
+            borderRadius: "4px",
+            boxShadow: "0 6px 16px rgba(0,0,0,0.35)",
+          }}
+        />
 
         <div className="card__cover-text">
           <h3 className="card__cover-title">{book.title}</h3>
