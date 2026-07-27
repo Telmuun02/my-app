@@ -20,7 +20,6 @@ class DatabaseSeeder extends Seeder
             AuthorSeeder::class,
             UserSeeder::class,
             BookSeeder::class,
-            FakeDataSeeder::class,   // зохиомол bulk өгөгдөл — хамгийн сүүлд
         ]);
     }
 }

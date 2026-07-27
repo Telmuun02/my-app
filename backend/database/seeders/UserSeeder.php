@@ -31,5 +31,8 @@ class UserSeeder extends Seeder
             'role'       => 'user',
             'company_id' => Company::inRandomOrder()->value('id'),
         ]);
+
+        // Зохиомол bulk хэрэглэгчид
+        User::factory()->count(1000)->create();
     }
 }

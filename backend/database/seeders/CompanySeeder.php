@@ -19,5 +19,8 @@ class CompanySeeder extends Seeder
         Company::create(['name' => 'Andrew Hunt']);
         Company::create(['name' => 'David Thomas']);
         Company::create(['name' => 'Richard Dawkins']);
+
+        // Зохиомол bulk компаниуд
+        Company::factory()->count(10)->create();
     }
 }

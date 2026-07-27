@@ -43,5 +43,7 @@ class BookSeeder extends Seeder
             $authorIds = Author::whereIn('name', $data['authors'])->pluck('id');
             $book->authors()->attach($authorIds);
         }
+
+        Book::factory()->count(100)->create(); 
     }
 }
