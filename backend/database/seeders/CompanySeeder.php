@@ -12,15 +12,7 @@ class CompanySeeder extends Seeder
      */
     public function run(): void
     {
-        Company::create(['name' => 'George Orwell']);
-        Company::create(['name' => 'Stephen Hawking']);
-        Company::create(['name' => 'Yuval Noah Harari']);
-        Company::create(['name' => 'Robert C. Martin']);
-        Company::create(['name' => 'Andrew Hunt']);
-        Company::create(['name' => 'David Thomas']);
-        Company::create(['name' => 'Richard Dawkins']);
-
-        // Зохиомол bulk компаниуд
-        Company::factory()->count(10)->create();
+        // Бүх компанийг factory-гоор дараалсан нэртэй үүсгэнэ: Company1 ... Company17
+        Company::factory()->count(17)->create();
     }
 }

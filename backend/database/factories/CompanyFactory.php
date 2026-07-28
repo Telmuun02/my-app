@@ -17,8 +17,12 @@ class CompanyFactory extends Factory
      */
     public function definition(): array
     {
+        // Бичлэг үүсэх бүрт нэмэгддэг тоолуур → Company1, Company2, ...
+        static $n = 0;
+        $n++;
+
         return [
-            'name'  => fake()->unique()->company(),
+            'name'  => 'Company' . $n,
             'email' => fake()->unique()->safeEmail(),
             'phone_number' => fake()->numerify('9#######'),
         ];

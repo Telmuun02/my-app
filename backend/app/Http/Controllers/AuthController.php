@@ -83,7 +83,7 @@ class AuthController extends Controller
         ]);
 
         try {
-            $user = User::where('email', $validated['email'])->first();
+            $user = User::where('email', $validated['email'])->with('company')->first();
 
             if (! $user || ! Hash::check($validated['password'], $user->password)) {
                 // Amjiltgu nevtreh uildliig ni medegdeh.
@@ -127,7 +127,7 @@ class AuthController extends Controller
         ]);
 
         return response()->json([
-            'user'  => $user->load('company'),          
+            'user'  => $user,   // company нь дээр with('company')-оор аль хэдийн ачаалагдсан
             'token' => $token,
         ]);
     }
