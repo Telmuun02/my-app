@@ -1,30 +1,25 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import BookCard from "./BookCard";
 import Pagination from "./Pagination";
 import { SearchIcon } from "./icons";
 import client from "../api/client";
 
-const PER_PAGE = 8; // Нэг хуудсанд харуулах номын тоо.
-
-// API-ийн ном → компонентуудын хүлээж буй энгийн бүтэц рүү хөрвүүлэх.
-// API: { authors: [{name}], category: {name}, available_copies }
-// UI :  { author: "...", category: "...", available: N }
+// API-ийн ном → UI-д хэрэгтэй энгийн бүтэц рүү хөрвүүлэх.
+// BookResource: { authors: ["Нэр"], category: "Нэр", available: N }
 function normalizeBook(book) {
   return {
     id: book.id,
     title: book.title,
-    author: book.authors?.map((a) => a.name).join(", ") || "Unknown",
-    category: book.category?.name ?? "Uncategorized",
-    available: book.available_copies,
+    author: book.authors?.join(", ") || "Unknown",
+    category: book.category ?? "Uncategorized",
+    available: book.available,
   };
 }
 
-// Номын каталог: зүүн талд шүүлтүүр, баруун талд номын grid.
-// query нь header-тэй хуваалцсан хайлт (App-аас ирнэ).
-// user — нэвтэрсэн хэрэглэгч (зээлэх боломжтой эсэхийг шийднэ).
+// Номын каталог. Одоо шүүлт/хайлт/pagination бүгд SERVER дээр хийгддэг —
+// нэг хуудсанд ердөө 8 ном татна (бүх 108-ыг биш).
 function Catalog({ query, onQueryChange, user }) {
-  // Backend-ээс татсан өгөгдөл.
   const [books, setBooks] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -33,16 +28,35 @@ function Catalog({ query, onQueryChange, user }) {
   const [category, setCategory] = useState("all");
   const [availability, setAvailability] = useState("all");
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
 
-  // Анх ачаалахад backend-ээс ном ба ангиллыг зэрэг татна.
+  // Ангиллыг нэг удаа татна (өөрчлөгддөггүй).
   useEffect(() => {
-    let active = true; // компонент салсны дараа setState хийхээс сэргийлнэ
+    client
+      .get("/categories")
+      .then((res) => setCategories(res.data.map((c) => c.name)))
+      .catch(() => {});
+  }, []);
+
+  // Ном: хуудас/шүүлт/хайлт өөрчлөгдөх бүрд server-ээс тухайн хуудсыг татна.
+  useEffect(() => {
+    let active = true;
     setLoading(true);
-    Promise.all([client.get("/books"), client.get("/categories")])
-      .then(([booksRes, catsRes]) => {
+
+    // Шүүлт/хайлт/хуудсыг query параметр болгож илгээнэ (?page=..&category=..&search=..).
+    const params = { page };
+    if (category !== "all") params.category = category;
+    if (availability !== "all") params.availability = availability;
+    if (query.trim()) params.search = query.trim();
+
+    client
+      .get("/books", { params })
+      .then((res) => {
         if (!active) return;
-        setBooks(booksRes.data.map(normalizeBook));
-        setCategories(catsRes.data.map((c) => c.name));
+        setBooks(res.data.data.map(normalizeBook)); // тухайн хуудсын 8 ном
+        setTotalPages(res.data.meta.last_page); // нийт хэдэн хуудас
+        setTotalCount(res.data.meta.total); // нийт хэдэн ном (шүүлтийн дараа)
         setError("");
       })
       .catch(() => {
@@ -51,14 +65,19 @@ function Catalog({ query, onQueryChange, user }) {
       .finally(() => {
         if (active) setLoading(false);
       });
+
     return () => {
       active = false;
     };
-  }, []);
+  }, [page, category, availability, query]);
+
+  // Шүүлт/хайлт өөрчлөгдвөл эхний хуудас руу буцаана.
+  useEffect(() => {
+    setPage(1);
+  }, [category, availability, query]);
 
   // Ном зээлэх: /loans руу POST, амжилттай бол локал available-ийг 1 бууруулна.
   const handleBorrow = async (bookId) => {
-    // Буцаах хугацаа: өнөөдрөөс 14 хоногийн дараа (YYYY-MM-DD).
     const due = new Date();
     due.setDate(due.getDate() + 14);
     const dueDate = due.toISOString().slice(0, 10);
@@ -73,33 +92,6 @@ function Catalog({ query, onQueryChange, user }) {
     }
   };
 
-  // Хайлт + 2 шүүлтүүрийг нэг дор хэрэглэнэ.
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return books.filter((book) => {
-      const matchCategory = category === "all" || book.category === category;
-      const matchAvailability =
-        availability === "all" ||
-        (availability === "available" && book.available > 0) ||
-        (availability === "checked-out" && book.available === 0);
-      const matchQuery =
-        q === "" ||
-        book.title.toLowerCase().includes(q) ||
-        book.author.toLowerCase().includes(q);
-      return matchCategory && matchAvailability && matchQuery;
-    });
-  }, [books, query, category, availability]);
-
-  // Шүүлтүүр/хайлт өөрчлөгдвөл эхний хуудас руу буцаана.
-  useEffect(() => {
-    setPage(1);
-  }, [query, category, availability]);
-
-  // Нийт хуудас ба одоогийн хуудсанд харагдах номнууд.
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
-  const start = (page - 1) * PER_PAGE;
-  const pageBooks = filtered.slice(start, start + PER_PAGE);
-
   return (
     <div className="layout">
       <Sidebar
@@ -113,7 +105,7 @@ function Catalog({ query, onQueryChange, user }) {
       <main className="content">
         <div className="content__head">
           <h1>Library Catalog</h1>
-          <p className="content__count">{filtered.length} books found</p>
+          <p className="content__count">{totalCount} books found</p>
         </div>
 
         <div className="content__search">
@@ -130,12 +122,12 @@ function Catalog({ query, onQueryChange, user }) {
           <p className="content__empty">Loading…</p>
         ) : error ? (
           <p className="content__empty">{error}</p>
-        ) : filtered.length === 0 ? (
+        ) : books.length === 0 ? (
           <p className="content__empty">No books match your filters.</p>
         ) : (
           <>
             <div className="grid">
-              {pageBooks.map((book) => (
+              {books.map((book) => (
                 <BookCard key={book.id} book={book} user={user} onBorrow={handleBorrow} />
               ))}
             </div>

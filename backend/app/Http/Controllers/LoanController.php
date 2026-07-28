@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Book;
 use App\Models\Loan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\ValidationException;
 
 class LoanController extends Controller
@@ -44,11 +45,16 @@ class LoanController extends Controller
 
         $book->decrement('available_copies');
 
+        Cache::forget('books.index');   // availability өөрчлөгдсөн → cache цэвэрлэнэ
+
         return response()->json($loan->load('book'), 201);
     }
 
     public function show(Loan $loan)
     {
+        //
+        //users      =>  A, a@gmail.com, 1
+        //companies  =>  1, M, 99887766
         return response()->json($loan->load(['book', 'user']));
     }
 
@@ -64,6 +70,8 @@ class LoanController extends Controller
 
         $loan->book->increment('available_copies');
 
+        Cache::forget('books.index');   // availability өөрчлөгдсөн → cache цэвэрлэнэ
+
         return response()->json($loan->load('book'));
     }
 
@@ -74,6 +82,8 @@ class LoanController extends Controller
         }
 
         $loan->delete();
+
+        Cache::forget('books.index');   // availability өөрчлөгдсөн байж болзошгүй → cache цэвэрлэнэ
 
         return response()->json(['message' => 'Зээлийн бичлэг устгагдлаа.']);
     }

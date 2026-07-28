@@ -2,18 +2,43 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\BookResource;
 use App\Models\Book;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class BookController extends Controller
 {
     /**
      * Бүх номыг (ангилал, зохиолчтой нь) жагсаах.  GET /api/books
      */
-    public function index()
+    public function index(Request $request)
     {
-        // with(...) → N+1 query-гээс сэргийлж холбоотой өгөгдлийг зэрэг ачаална
-        return response()->json(Book::with(['category', 'authors'])->get());
+        $query = Book::with(['category', 'authors']);
+
+        // Server-side шүүлт — pagination-той зөв ажиллахын тулд шүүлтийг server дээр хийнэ.
+        if ($request->filled('category') && $request->category !== 'all') {
+            $name = $request->category;
+            $query->whereHas('category', fn ($q) => $q->where('name', $name));
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            // Гарчиг ЭСВЭЛ зохиолчийн нэрээр хайна
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhereHas('authors', fn ($a) => $a->where('name', 'like', "%{$search}%"));
+            });
+        }
+
+        if ($request->availability === 'available') {
+            $query->where('available_copies', '>', 0);
+        } elseif ($request->availability === 'checked-out') {
+            $query->where('available_copies', '=', 0);
+        }
+
+        // paginate(8) → зөвхөн 8 ном + pagination мэдээлэл (meta, links) буцаана
+        return BookResource::collection($query->paginate(8));
     }
 
     /**
@@ -43,6 +68,8 @@ class BookController extends Controller
         if (! empty($validated['author_ids'])) {
             $book->authors()->attach($validated['author_ids']);
         }
+
+        Cache::forget('books.index');   // жагсаалт өөрчлөгдсөн → cache цэвэрлэнэ
 
         return response()->json($book->load(['category', 'authors']), 201);
     }
@@ -76,6 +103,8 @@ class BookController extends Controller
             $book->authors()->sync($validated['author_ids'] ?? []);
         }
 
+        Cache::forget('books.index');   // жагсаалт өөрчлөгдсөн → cache цэвэрлэнэ
+
         return response()->json($book->load(['category', 'authors']));
     }
 
@@ -85,6 +114,8 @@ class BookController extends Controller
     public function destroy(Book $book)
     {
         $book->delete();
+
+        Cache::forget('books.index');   // жагсаалт өөрчлөгдсөн → cache цэвэрлэнэ
 
         return response()->json(['message' => 'Ном устгагдлаа.']);
     }
