@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Resources\BookResource;
 use App\Models\Book;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 
 class BookController extends Controller
 {
@@ -69,8 +68,6 @@ class BookController extends Controller
             $book->authors()->attach($validated['author_ids']);
         }
 
-        Cache::forget('books.index');   // жагсаалт өөрчлөгдсөн → cache цэвэрлэнэ
-
         return response()->json($book->load(['category', 'authors']), 201);
     }
 
@@ -103,8 +100,6 @@ class BookController extends Controller
             $book->authors()->sync($validated['author_ids'] ?? []);
         }
 
-        Cache::forget('books.index');   // жагсаалт өөрчлөгдсөн → cache цэвэрлэнэ
-
         return response()->json($book->load(['category', 'authors']));
     }
 
@@ -114,8 +109,6 @@ class BookController extends Controller
     public function destroy(Book $book)
     {
         $book->delete();
-
-        Cache::forget('books.index');   // жагсаалт өөрчлөгдсөн → cache цэвэрлэнэ
 
         return response()->json(['message' => 'Ном устгагдлаа.']);
     }
