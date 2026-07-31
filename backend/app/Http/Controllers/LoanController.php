@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Book;
 use App\Models\Loan;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use App\Jobs\CreateLoanJob;
 
 class LoanController extends Controller
 {
@@ -27,24 +27,11 @@ class LoanController extends Controller
             'due_date' => 'required|date|after:today',
         ]);
 
-        $book = Book::findOrFail($validated['book_id']);
+        CreateLoanJob::dispatch($validated, $request->user()->id);
 
-        if ($book->available_copies < 1) {
-            throw ValidationException::withMessages([
-                'book_id' => ['Энэ номын авах боломжтой хувь үлдээгүй байна.'],
-            ]);
-        }
-
-        $loan = Loan::create([
-            'user_id'   => $request->user()->id,
-            'book_id'   => $book->id,
-            'loan_date' => now()->toDateString(),
-            'due_date'  => $validated['due_date'],
-        ]);
-
-        $book->decrement('available_copies');
-
-        return response()->json($loan->load('book'), 201);
+        // 202 Accepted — "хүсэлт хүлээн авлаа, боловсруулагдаж байна".
+        // 201 Created БИШ, учир нь зээллэг queue-д хараахан үүсээгүй, worker дараа нь үүсгэнэ.
+        return response()->json(['message' => 'Зээлийн хүсэлт хүлээн авлаа.'], 202);
     }
 
     public function show(Loan $loan)

@@ -51,9 +51,13 @@ class BookController extends Controller
         $key = "books.v{$version}.{$category}.{$search}.{$availability}.page.{$page}";
 
         // Cache-д байвал DB-д ороохгүй шууд буцаана; байхгүй бол query-г ажиллуулж 60 сек хадгална.
-        $books = Cache::remember($key, 60, fn () => $query->paginate(8));
+        // ЧУХАЛ: paginate() объектыг шууд cache-лэхгүй — тэр "амьд" объект serialize/unserialize
+        // хийхэд эвдэрдэг. Иймд resource-ийг энгийн массив (data, links, meta) болгож хадгална.
+        $data = Cache::remember($key, 60, fn () => BookResource::collection($query->paginate(8))
+            ->response()
+            ->getData(true));
 
-        return BookResource::collection($books);
+        return response()->json($data);
     }
 
     /**
