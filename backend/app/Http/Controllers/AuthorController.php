@@ -7,11 +7,13 @@ use Illuminate\Http\Request;
 
 class AuthorController extends Controller
 {
+    // list butsaah function
     public function index()
     {
         return response()->json(Author::all());
     }
 
+    // store buyu create hiih
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -22,12 +24,14 @@ class AuthorController extends Controller
 
         return response()->json($author, 201);
     }
-
+    
+    // select hiih
     public function show(Author $author)
     {
         return response()->json($author->load('books'));
     }
 
+    // update hiih
     public function update(Request $request, Author $author)
     {
         $validated = $request->validate([
@@ -39,7 +43,8 @@ class AuthorController extends Controller
         return response()->json($author);
     }
 
-    public function destroy(Author $author)
+    // delete hiih
+    public function destroy(Author $author) 
     {
         $author->delete();
 

@@ -14,48 +14,45 @@ class BookController extends Controller
      */
     public function index(Request $request)
     {
+        // join hiigeed avch bn.
         $query = Book::with(['category', 'authors']);
 
-        // Server-side шүүлт — pagination-той өв ажиллахын тулд шүүлтийг server дээр хийнэ.
+        // category filter hiih
         if ($request->filled('category') && $request->category !== 'all') {
             $name = $request->category;
             $query->whereHas('category', fn ($q) => $q->where('name', $name));
         }
 
+        // search eer haih
         if ($request->filled('search')) {
             $search = $request->search;
-            // Гарчиг ЭСВЭЛ зохиолчийн нэрээр хайна
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                   ->orWhereHas('authors', fn ($a) => $a->where('name', 'like', "%{$search}%"));
             });
         }
 
+        // tuhain nom ni 0 ees ih huvi baina uu 
         if ($request->availability === 'available') {
             $query->where('available_copies', '>', 0);
         } elseif ($request->availability === 'checked-out') {
             $query->where('available_copies', '=', 0);
         }
 
-        // --- Cache ---
-        // Жагсаалтын "хувилбар" дугаар. Ном өөрчлөгдөх бүрд нэмэгдэж, бүх хуучин key-г
-        // автоматаар хүчингүй болгоно (доорх store/update/destroy-г үз).
+        // Cache iin version hed deer bgg ni olno bhgu bol 1 
         $version = Cache::get('books.version', 1);
 
-        // Шүүлтийн параметр бүрийг key-д оруулна — параметр өөр байх бүрт өөр cache үүснэ.
+        // cache key uusgehed hereglegdeh ugugdluudiig
         $page         = $request->input('page', 1);
         $category     = $request->input('category', 'all');
         $search       = $request->input('search', '');
         $availability = $request->input('availability', '');
-
+ 
         $key = "books.v{$version}.{$category}.{$search}.{$availability}.page.{$page}";
 
-        // Cache-д байвал DB-д ороохгүй шууд буцаана; байхгүй бол query-г ажиллуулж 60 сек хадгална.
-        // ЧУХАЛ: paginate() объектыг шууд cache-лэхгүй — тэр "амьд" объект serialize/unserialize
-        // хийхэд эвдэрдэг. Иймд resource-ийг энгийн массив (data, links, meta) болгож хадгална.
-        $data = Cache::remember($key, 60, fn () => BookResource::collection($query->paginate(8))
-            ->response()
-            ->getData(true));
+        // cache deer key deer hadgalsan zuil bgaa esehiig ni olno bgaa bol cache aas butsaana
+        // bhgu bol fn () => {} dotorhiig ajluulna
+        $data = Cache::remember($key, 60, fn () => BookResource::collection($query->paginate(8))->response()->getData(true));
 
         return response()->json($data);
     }
@@ -64,7 +61,8 @@ class BookController extends Controller
      * Шинэ ном үүсгэх.  POST /api/books
      */
     public function store(Request $request)
-    {
+    {   
+        // tohiroh shaardlaguud
         $validated = $request->validate([
             'title'          => 'required|string|max:255',
             'isbn'           => 'required|string|unique:books',
@@ -74,7 +72,7 @@ class BookController extends Controller
             'author_ids.*'   => 'exists:authors,id',
         ]);
 
-        // Эхэндээ авах боломжтой хувь = нийт хувь
+        // shineer ugugdul uusgeh 
         $book = Book::create([
             'title'            => $validated['title'],
             'isbn'             => $validated['isbn'],
@@ -88,7 +86,7 @@ class BookController extends Controller
             $book->authors()->attach($validated['author_ids']);
         }
 
-        // Жагсаалт өөрчлөгдсөн → version нэмж, бүх хуучин cache-г хүчингүй болгоно
+        // cache iinha toog ni nemj daraagiin version uusgeh
         Cache::put('books.version', Cache::get('books.version', 1) + 1);
 
         return response()->json($book->load(['category', 'authors']), 201);
@@ -107,6 +105,7 @@ class BookController extends Controller
      */
     public function update(Request $request, Book $book)
     {
+        // shaardlaguud
         $validated = $request->validate([
             'title'        => 'sometimes|required|string|max:255',
             'isbn'         => 'sometimes|required|string|unique:books,isbn,' . $book->id,
@@ -118,12 +117,11 @@ class BookController extends Controller
 
         $book->update($validated);
 
-        // Зохиолчдын жагсаалт ирсэн бол шинэчилнэ (sync = хуучныг сольж шинээр тавина)
         if ($request->has('author_ids')) {
             $book->authors()->sync($validated['author_ids'] ?? []);
         }
 
-        // Жагсаалт өөрчлөгдсөн → version нэмж, бүх хуучин cache-г хүчингүй болгоно
+        // buh huvilbariin toog negeer nemegduulne
         Cache::put('books.version', Cache::get('books.version', 1) + 1);
 
         return response()->json($book->load(['category', 'authors']));
@@ -136,7 +134,7 @@ class BookController extends Controller
     {
         $book->delete();
 
-        // Жагсаалт өөрчлөгдсөн → version нэмж, бүх хуучин cache-г хүчингүй болгоно
+        // buh huvilbariin toog negeer nemegduulne
         Cache::put('books.version', Cache::get('books.version', 1) + 1);
 
         return response()->json(['message' => 'Ном устгагдлаа.']);

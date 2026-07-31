@@ -12,9 +12,10 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    // register function
     public function register(Request $request)
     {
-        
+        // request iin shaardlaga
         $validated = $request->validate([
             'name'       => 'required|string|max:255',
             'email'      => 'required|string|email|max:255|unique:users',
@@ -29,6 +30,7 @@ class AuthController extends Controller
 
         // aldaa oloh
         try {
+            // shine user uusgeh gej oroldoh
             $user = User::create([
                 'name'       => $validated['name'],
                 'email'      => $validated['email'],
@@ -36,6 +38,7 @@ class AuthController extends Controller
                 'company_id' => $validated['company_id'],
             ]);
 
+            // ter hereglegchdee token uusgeh
             $token = $user->createToken('auth_token')->plainTextToken;
         } catch (UniqueConstraintViolationException $e) {
             // Email davhtsval.
@@ -69,7 +72,7 @@ class AuthController extends Controller
         ]);
 
         return response()->json([
-            'user'  => $user->load('company'),   // компанийг нь хамт буцаана (шинэ user бол null)
+            'user'  => $user->load('company'),   
             'token' => $token,
         ], 201);
     }
@@ -77,14 +80,17 @@ class AuthController extends Controller
     
     public function login(Request $request)
     {
+        // login shaardlaguud
         $validated = $request->validate([
             'email'    => 'required|string|email',
             'password' => 'required|string',
         ]);
 
         try {
+            // email deer useriig olno, company ni load hiine
             $user = User::where('email', $validated['email'])->with('company')->first();
 
+            // nuuts ug ni taarch baigaag ni shalgah
             if (! $user || ! Hash::check($validated['password'], $user->password)) {
                 // Amjiltgu nevtreh uildliig ni medegdeh.
                 Log::warning('Амжилтгүй нэвтрэх оролдлого.', [
@@ -98,6 +104,7 @@ class AuthController extends Controller
                 ]);
             }
 
+            // token uusgeh
             $token = $user->createToken('auth_token')->plainTextToken;
         } catch (ValidationException $e) {
             // aldaa shideh
@@ -146,9 +153,11 @@ class AuthController extends Controller
      * Гарах — одоогийн token-ыг устгана.
      */
     public function logout(Request $request)
-    {
+    {   
+        // id gaar ni useriig olno
         $userId = $request->user()->id;
 
+        // token iig ni ustgana
         $request->user()->currentAccessToken()->delete();
 
         // INFO — хэрэглэгч гарсныг тэмдэглэнэ.

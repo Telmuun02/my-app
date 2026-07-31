@@ -9,16 +9,10 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        // 1. paginate - хуудаслалттай хийх 
-        // limit - 100
-        // page - 2
-        // 2. seeder + factory - 100 ангилал үүсгэх || 
-        // Facade => software design pattern || architecture
-        // unique => үүсэхэд Log бичдэг болгох || INFO, ERROR, WARNING, DEBUG, TRACE
         return response()->json(Category::all());
     }
 
-
+    // create
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -30,13 +24,13 @@ class CategoryController extends Controller
         return response()->json($category, 201);
     }
 
-
+    // select
     public function show(Category $category)
     {
         return response()->json($category->load('books'));
     }
 
-
+    // update
     public function update(Request $request, Category $category)
     {
         $validated = $request->validate([
@@ -48,7 +42,7 @@ class CategoryController extends Controller
         return response()->json($category);
     }
 
-
+    // delete
     public function destroy(Category $category)
     {
         $category->delete();

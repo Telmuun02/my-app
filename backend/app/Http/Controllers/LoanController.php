@@ -7,12 +7,15 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use App\Jobs\CreateLoanJob;
 
+// zeelleg san
 class LoanController extends Controller
-{
+{   
+    // list butsaah
     public function index(Request $request)
-    {
+    {   
+        // book, user 2 iig tsugt ni avah  
         $query = Loan::with(['book', 'user']);
-
+        
         if ($request->user()->role !== 'admin') {
             $query->where('user_id', $request->user()->id);
         }
@@ -20,8 +23,10 @@ class LoanController extends Controller
         return response()->json($query->get());
     }
 
+    // create
     public function store(Request $request)
-    {
+    {   
+        // shaardlaa ni 
         $validated = $request->validate([
             'book_id'  => 'required|exists:books,id',
             'due_date' => 'required|date|after:today',
@@ -57,6 +62,7 @@ class LoanController extends Controller
         return response()->json($loan->load('book'));
     }
 
+    // delete
     public function destroy(Loan $loan)
     {
         if ($loan->return_date === null) {
