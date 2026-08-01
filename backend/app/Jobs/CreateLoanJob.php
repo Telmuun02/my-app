@@ -9,13 +9,24 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+// UniqueQueue 
+// event
+// back-off
+// retry
+
+// redis hiih. 
+
+
 class CreateLoanJob implements ShouldQueue
 {
     use Queueable;
 
+    // herhen retry hiih ve medeh. 
+
+
     public function __construct(public array $data, public int $userId)
-    {
-        //
+    {   
+        // 
     }
 
     /**
