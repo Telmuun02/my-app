@@ -2,14 +2,16 @@
 
 namespace App\Jobs;
 
+use App\Events\LoanRegistered;
 use App\Models\Book;
 use App\Models\Loan;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-// UniqueQueue 
+// ShouldBeUnique
 // event
 // back-off
 // retry
@@ -17,7 +19,7 @@ use Illuminate\Support\Facades\Log;
 // redis hiih. 
 
 
-class CreateLoanJob implements ShouldQueue
+class CreateLoanJob implements ShouldQueue, ShouldBeUnique
 {
     use Queueable;
 
@@ -29,6 +31,11 @@ class CreateLoanJob implements ShouldQueue
         // 
     }
 
+    public function uniqueId(): string
+    {
+        return $this->userId . '-' . $this->data['book_id'];
+    }
+
     /**
      * Worker ажиллах үед зээллэг DB-д бичигдэнэ.
      */
@@ -36,7 +43,7 @@ class CreateLoanJob implements ShouldQueue
     {
         // transaction + lockForUpdate — олон job зэрэг ажиллавал ч нэг номыг 2 удаа
         // зээлэхээс (overselling) хамгаална: номын мөрийг түгжиж, нэг нэгээр боловсруулна.
-        DB::transaction(function () {
+        $loan = DB::transaction(function () {
             $book = Book::lockForUpdate()->find($this->data['book_id']);
 
             // Ном үлдээгүй бол зээллэг үүсгэхгүй, зөвхөн тэмдэглэнэ
@@ -45,7 +52,7 @@ class CreateLoanJob implements ShouldQueue
                     'book_id' => $this->data['book_id'],
                     'user_id' => $this->userId,
                 ]);
-                return;
+                return null;
             }
 
             // Зээллэг ЭНД DB-д бичигдэнэ
@@ -64,6 +71,16 @@ class CreateLoanJob implements ShouldQueue
                 'user_id' => $this->userId,
                 'book'    => $book->title,
             ]);
+
+            return $loan;
         });
+
+        // Event-ийг transaction commit хийгдсэний ДАРАА ялгаруулна.
+        // Дотор нь дуудвал listener commit-оос өмнө ажиллаж, cache-ийг
+        // хуучин available_copies-оор дахин дүүргэх эрсдэлтэй.
+        // Ном үлдээгүй тохиолдолд $loan нь null тул event ялгарахгүй.
+        if ($loan) {
+            event(new LoanRegistered($loan));
+        }
     }
 }
