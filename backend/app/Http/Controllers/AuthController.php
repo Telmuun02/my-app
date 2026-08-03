@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SendVerifyEmailJob;
 use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -38,8 +39,9 @@ class AuthController extends Controller
                 'company_id' => $validated['company_id'],
             ]);
 
-            // ter hereglegchdee token uusgeh
-            $token = $user->createToken('auth_token')->plainTextToken;
+            // ЭНД token үүсгэхгүй!
+            // Хатуу горим: и-мэйл баталгаажтал ямар ч token гарахгүй.
+            // Хэрэглэгч мэйл дэх холбоосыг дараад, дараа нь /login-оор нэвтэрнэ.
         } catch (UniqueConstraintViolationException $e) {
             // Email davhtsval.
             Log::warning('Бүртэлтэй и-мэйл байна.', [
@@ -71,9 +73,28 @@ class AuthController extends Controller
             'email'   => $user->email,
         ]);
 
+        // Баталгаажуулах и-мэйл илгээх.
+        //
+        // dispatchSync() — job-ыг queue-д оруулахгүй, энэ хүсэлтийн дотор шууд
+        // ажиллуулна. Тиймээс queue:work worker асаах шаардлагагүй.
+        //
+        // try/catch ЗААВАЛ хэрэгтэй: sync үед job доторх алдаа энд давхиж гардаг.
+        // Мэйл яваагүй ч хэрэглэгч аль хэдийн үүссэн тул 500 буцаах нь буруу —
+        // алдааг зөвхөн тэмдэглээд, бүртгэлийг амжилттай гэж хариулна.
+        // Хэрэглэгч дараа нь /api/email/verification-notification-оор дахин авч болно.
+        try {
+            SendVerifyEmailJob::dispatchSync($user);
+        } catch (\Throwable $e) {
+            // Дэлгэрэнгүй лог нь job-ийн failed() дотор аль хэдийн бичигдсэн.
+        }
+
+        // Token БАЙХГҮЙ — frontend "мэйлээ шалгана уу" дэлгэц харуулна.
+        // 'email'-ыг буцааж байгаа нь тэр дэлгэц дээр хаягийг харуулах,
+        // мөн "дахин илгээх" товчинд ашиглахад хэрэгтэй.
         return response()->json([
-            'user'  => $user->load('company'),   
-            'token' => $token,
+            'user'    => $user->load('company'),
+            'email'   => $user->email,
+            'message' => 'Бүртгэл амжилттай. И-мэйл хаягаа баталгаажуулна уу.',
         ], 201);
     }
 
@@ -102,6 +123,22 @@ class AuthController extends Controller
                 throw ValidationException::withMessages([
                     'email' => ['И-мэйл эсвэл нууц үг буруу байна.'],
                 ]);
+            }
+
+            // ХАТУУ ГОРИМ: и-мэйл баталгаажаагүй бол token огт өгөхгүй.
+            // Нууц үг зөв гэдгийг мэдэж байгаа тул email_unverified туг буцаана —
+            // frontend үүгээр "дахин илгээх" товчийг харуулна.
+            if (! $user->hasVerifiedEmail()) {
+                Log::warning('Баталгаажаагүй и-мэйлээр нэвтрэх оролдлого.', [
+                    'user_id' => $user->id,
+                    'email'   => $user->email,
+                ]);
+
+                return response()->json([
+                    'message'          => 'И-мэйл хаяг баталгаажаагүй байна. Мэйлээ шалгана уу.',
+                    'email_unverified' => true,
+                    'email'            => $user->email,
+                ], 403);
             }
 
             // token uusgeh

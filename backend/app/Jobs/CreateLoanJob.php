@@ -10,6 +10,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Throwable;
+use Exception;
 
 // ShouldBeUnique
 // event
@@ -22,6 +24,9 @@ use Illuminate\Support\Facades\Log;
 class CreateLoanJob implements ShouldQueue, ShouldBeUnique
 {
     use Queueable;
+
+    public $tries = 3; // retry hiih.
+    public $backoff = [5, 10, 15];
 
     // herhen retry hiih ve medeh. 
 
@@ -41,8 +46,8 @@ class CreateLoanJob implements ShouldQueue, ShouldBeUnique
      */
     public function handle(): void
     {
-        // transaction + lockForUpdate — олон job зэрэг ажиллавал ч нэг номыг 2 удаа
-        // зээлэхээс (overselling) хамгаална: номын мөрийг түгжиж, нэг нэгээр боловсруулна.
+
+        // transaction + lockForUpdate — олон job
         $loan = DB::transaction(function () {
             $book = Book::lockForUpdate()->find($this->data['book_id']);
 
@@ -53,6 +58,7 @@ class CreateLoanJob implements ShouldQueue, ShouldBeUnique
                     'user_id' => $this->userId,
                 ]);
                 return null;
+                
             }
 
             // Зээллэг ЭНД DB-д бичигдэнэ
@@ -75,12 +81,15 @@ class CreateLoanJob implements ShouldQueue, ShouldBeUnique
             return $loan;
         });
 
-        // Event-ийг transaction commit хийгдсэний ДАРАА ялгаруулна.
-        // Дотор нь дуудвал listener commit-оос өмнө ажиллаж, cache-ийг
-        // хуучин available_copies-оор дахин дүүргэх эрсдэлтэй.
-        // Ном үлдээгүй тохиолдолд $loan нь null тул event ялгарахгүй.
-        if ($loan) {
-            event(new LoanRegistered($loan));
-        }
+        event(new LoanRegistered($loan));
+    }
+
+    public function failed(Throwable $exception): void
+    {
+        Log::error("CreateLoanJob amjiltgui bolloo.", [
+            'user_id' => $this->userId,
+            'book_id' => $this->data['book_id'],
+            "error" => $exception->getMessage(),
+        ]);
     }
 }

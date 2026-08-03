@@ -1,10 +1,15 @@
 import { useState } from "react";
 import AuthLayout from "./AuthLayout";
+import VerifyNotice from "./VerifyNotice";
 import client from "../api/client";
 
 // Бүртгүүлэх хуудас. handleSubmit нь backend-ийн /register endpoint-ыг дуудна.
 // Анхаар: backend "confirmed" дүрэмтэй тул password_confirmation талбар шаардана.
-function Register({ onNavigate, onAuth }) {
+//
+// ХАТУУ ГОРИМ: backend бүртгэлийн хариунд token БУЦААХГҮЙ. Тиймээс энд шууд
+// нэвтрүүлэхгүй — "мэйлээ шалгана уу" дэлгэц харуулж, хэрэглэгч и-мэйлээ
+// баталгаажуулсны дараа /signin-ээр нэвтэрнэ.
+function Register({ onNavigate }) {
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -14,6 +19,8 @@ function Register({ onNavigate, onAuth }) {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  // Бүртгэл амжилттай болмогц энд и-мэйл хаяг орж, дэлгэц солигдоно.
+  const [pendingEmail, setPendingEmail] = useState("");
 
   // Нэг handler-аар бүх талбарыг шинэчилнэ (input-ийн name-ээр).
   const update = (e) => setForm({ ...form, [e.target.name]: e.target.value });
@@ -23,15 +30,35 @@ function Register({ onNavigate, onAuth }) {
     setError("");
     setLoading(true);
     try {
-      // Амжилттай бол backend { user, token } буцаана (201).
+      // Амжилттай бол backend { user, email, message } буцаана (201). Token БАЙХГҮЙ.
       const { data } = await client.post("/register", form);
-      onAuth(data); // App-д token хадгалж, каталог руу шилжинэ.
+      setPendingEmail(data.email);
     } catch (err) {
       setError(err.response?.data?.message ?? "Бүртгэхэд алдаа гарлаа.");
     } finally {
       setLoading(false);
     }
   };
+
+  // Бүртгэл амжилттай — форм биш, баталгаажуулах заавар харуулна.
+  if (pendingEmail) {
+    return (
+      <AuthLayout
+        title="Мэйлээ шалгана уу"
+        subtitle="Бүртгэл үүслээ — дараагийн алхам ганцхан"
+        footer={
+          <>
+            Баталгаажуулсан уу?{" "}
+            <button type="button" className="auth__link" onClick={() => onNavigate("signin")}>
+              Sign in
+            </button>
+          </>
+        }
+      >
+        <VerifyNotice email={pendingEmail} />
+      </AuthLayout>
+    );
+  }
 
   return (
     <AuthLayout

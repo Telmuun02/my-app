@@ -1,5 +1,6 @@
 import { useState } from "react";
 import AuthLayout from "./AuthLayout";
+import VerifyNotice from "./VerifyNotice";
 import client from "../api/client";
 
 // Нэвтрэх хуудас. handleSubmit нь backend-ийн /login endpoint-ыг дуудна.
@@ -7,24 +8,53 @@ function SignIn({ onNavigate, onAuth }) {
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  // Нууц үг зөв ч и-мэйл баталгаажаагүй үед backend 403 + email_unverified буцаана.
+  const [unverifiedEmail, setUnverifiedEmail] = useState("");
 
   const update = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setUnverifiedEmail("");
     setLoading(true);
     try {
       // Амжилттай бол backend { user, token } буцаана.
       const { data } = await client.post("/login", form);
       onAuth(data); // App-д token хадгалж, каталог руу шилжинэ.
     } catch (err) {
-      // Laravel алдааны мессежийг харуулна (422 = буруу нэвтрэлт).
-      setError(err.response?.data?.message ?? "Нэвтрэхэд алдаа гарлаа.");
+      // 403 + email_unverified — нууц үг зөв, зөвхөн баталгаажуулалт дутуу.
+      // Энэ тохиолдолд улаан алдаа биш, дахин илгээх самбар харуулна.
+      if (err.response?.status === 403 && err.response?.data?.email_unverified) {
+        setUnverifiedEmail(err.response.data.email);
+      } else {
+        // Laravel алдааны мессежийг харуулна (422 = буруу нэвтрэлт).
+        setError(err.response?.data?.message ?? "Нэвтрэхэд алдаа гарлаа.");
+      }
     } finally {
       setLoading(false);
     }
   };
+
+  // Баталгаажаагүй — формын оронд заавар + дахин илгээх товч.
+  if (unverifiedEmail) {
+    return (
+      <AuthLayout
+        title="И-мэйл баталгаажаагүй"
+        subtitle="Нэвтрэхийн өмнө хаягаа баталгаажуулна уу"
+        footer={
+          <>
+            Баталгаажуулсан уу?{" "}
+            <button type="button" className="auth__link" onClick={() => setUnverifiedEmail("")}>
+              Дахин нэвтрэх
+            </button>
+          </>
+        }
+      >
+        <VerifyNotice email={unverifiedEmail} />
+      </AuthLayout>
+    );
+  }
 
   return (
     <AuthLayout

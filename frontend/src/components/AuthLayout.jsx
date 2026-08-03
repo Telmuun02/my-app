@@ -13,7 +13,8 @@ function AuthLayout({ title, subtitle, children, footer }) {
 
       <div className="auth__card">{children}</div>
 
-      <p className="auth__footer">{footer}</p>
+      {/* EmailVerified хуудас footer дамжуулдаггүй — хоосон <p> үлдээхгүй. */}
+      {footer && <p className="auth__footer">{footer}</p>}
     </div>
   );
 }

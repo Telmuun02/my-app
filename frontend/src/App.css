@@ -452,6 +452,54 @@
   color: var(--text);
 }
 
+/* ============ И-мэйл баталгаажуулалт (VerifyNotice / EmailVerified) ============ */
+.verify {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.verify__lead {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.verify__hint {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
+/* Амжилт / мэдээлэл — ногоон badge өнгөө ашиглав */
+.verify__ok {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background: var(--avail-bg);
+  color: var(--avail-text);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Алдаа */
+.verify__err {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background: #f7dcd8;
+  color: #8c2f22;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.verify .btn-block:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 /* ===================== Responsive ===================== */
 @media (max-width: 860px) {
   .layout {

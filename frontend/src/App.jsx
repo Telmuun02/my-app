@@ -3,6 +3,7 @@ import Header from "./components/Header";
 import Catalog from "./components/Catalog";
 import SignIn from "./components/SignIn";
 import Register from "./components/Register";
+import EmailVerified from "./components/EmailVerified";
 import client, { setToken, clearToken } from "./api/client";
 import "./App.css";
 
@@ -12,11 +13,17 @@ function loadStoredUser() {
   return raw ? JSON.parse(raw) : null;
 }
 
+// Backend баталгаажуулсны дараа /email-verified?status=… руу redirect хийдэг.
+// react-router байхгүй тул эхний ачаалалт дээр URL-ыг шууд шалгана.
+function initialView() {
+  return window.location.pathname === "/email-verified" ? "email-verified" : "catalog";
+}
+
 function App() {
   // Хайлт header ба каталог хоёрт хуваалцагдана.
   const [query, setQuery] = useState("");
   // Энгийн "router": одоо харагдаж буй хуудас.
-  const [view, setView] = useState("catalog");
+  const [view, setView] = useState(initialView);
   // Нэвтэрсэн хэрэглэгч (эсвэл null).
   const [user, setUser] = useState(loadStoredUser);
 
@@ -53,7 +60,10 @@ function App() {
 
       {view === "catalog" && <Catalog query={query} onQueryChange={setQuery} user={user} />}
       {view === "signin" && <SignIn onNavigate={setView} onAuth={handleAuth} />}
-      {view === "register" && <Register onNavigate={setView} onAuth={handleAuth} />}
+      {/* Register нь token авахаа больсон тул onAuth хэрэггүй — өөрөө
+          "мэйлээ шалгана уу" дэлгэц рүү шилжинэ. */}
+      {view === "register" && <Register onNavigate={setView} />}
+      {view === "email-verified" && <EmailVerified onNavigate={setView} />}
     </div>
   );
 }
