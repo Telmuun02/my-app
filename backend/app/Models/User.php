@@ -13,11 +13,9 @@ use Laravel\Sanctum\HasApiTokens;
 
 #[Fillable(['name', 'email', 'password', 'role', 'company_id'])]
 #[Hidden(['password', 'remember_token'])]
-// MustVerifyEmail — hasVerifiedEmail() / markEmailAsVerified() методуудыг өгнө,
-// мөн 'verified' middleware энэ interface-ийг шалгаж route хамгаална.
+// MustVerifyEmail — hasVerifiedEmail() / markEmailAsVerified() method() uudiig ugnu,.
 class User extends UserInheritance implements MustVerifyEmail
 {
-    /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
     /**
@@ -34,7 +32,7 @@ class User extends UserInheritance implements MustVerifyEmail
     }
 
     /**
-     * Хэрэглэгчийн харьяалагдах компани (нэг user → нэг company).
+     * user hamaaral
      */
     public function company()
     {

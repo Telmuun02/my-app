@@ -11,26 +11,19 @@ use Illuminate\Support\Facades\Mail;
 use Throwable;
 
 /**
- * Баталгаажуулах и-мэйл илгээх ажил.
- *
- * ЧУХАЛ: одоогоор энэ job-ыг dispatchSync()-ээр дууддаг тул queue worker
- * хэрэггүй — HTTP хүсэлтийн дотор шууд ажиллана. jobs хүснэгт хөндөгдөхгүй.
- *
- * ShouldQueue-г УСТГАЖ БОЛОХГҮЙ: түүнгүйгээр dispatchSync() нь sync queue-ийн
- * дамжлагыг алгасах тул алдаа гарахад failed() дуудагдахгүй, failed_jobs-д ч
- * юу ч бичигдэхгүй болно.
- *
- * Ирээдүйд асинхрон болгох бол controller дахь dispatchSync()-ыг dispatch()
- * болгоход л хангалттай — тэр үед доорх $tries / $backoff амьдарч эхэлнэ.
+ * batalgaajuulah mail iig ilgeeh job
+ * 
+ * ingehdee dispatchSync() ashiglaj baigaa uchir queue odoohondoo ashiglahgu 
  */
 class SendVerifyEmailJob implements ShouldQueue
 {
     use Queueable;
 
-    // Зөвхөн жинхэнэ queue руу шилжсэн үед үйлчилнэ. dispatchSync үед үл хэрэгсэнэ.
+    // queue ruu shiljih uyd l hereg boloh heseg
     public $tries = 3;
     public $backoff = [10, 30];
 
+    
     public function __construct(public User $user)
     {
         //

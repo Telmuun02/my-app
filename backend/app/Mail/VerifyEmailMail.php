@@ -11,15 +11,15 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\URL;
 
 /**
- * Бүртгүүлсэн хэрэглэгч рүү явах и-мэйл баталгаажуулах захидал.
+ * email zahidalaa bichiv
  *
- * Notification биш Mailable ашиглаж байгаа тул баталгаажуулах signed URL-ыг
- * Laravel биднийн өмнөөс үүсгэхгүй — доор гараар үүсгэж байна.
+ * Mailable ashiglasan 
  */
 class VerifyEmailMail extends Mailable
 {
     use Queueable, SerializesModels;
 
+    // baiguulagch 
     public function __construct(public User $user)
     {
         //
@@ -32,6 +32,7 @@ class VerifyEmailMail extends Mailable
         );
     }
 
+    // aguulga hesgiig ni bichiv
     public function content(): Content
     {
         return new Content(
@@ -44,12 +45,7 @@ class VerifyEmailMail extends Mailable
     }
 
     /**
-     * Хугацаатай + гарын үсэгтэй (signed) баталгаажуулах холбоос.
-     *
-     * - expires  → тогтоосон хугацааны дараа холбоос хүчингүй болно
-     * - signature→ URL-ийн аль ч хэсгийг өөрчилвөл гарын үсэг таарахгүй
-     * - sha1(email) → холбоосыг тухайн үеийн и-мэйл хаягтай холбоно, тул
-     *   хэрэглэгч и-мэйлээ солибол хуучин холбоос автоматаар хүчингүй болно
+     * link nii baih hugatsaa
      */
     protected function verificationUrl(): string
     {

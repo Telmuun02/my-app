@@ -30,7 +30,6 @@ class CreateLoanJob implements ShouldQueue, ShouldBeUnique
 
     // herhen retry hiih ve medeh. 
 
-
     public function __construct(public array $data, public int $userId)
     {   
         // 
@@ -42,26 +41,28 @@ class CreateLoanJob implements ShouldQueue, ShouldBeUnique
     }
 
     /**
-     * Worker ажиллах үед зээллэг DB-д бичигдэнэ.
+     * Worker ajillah zeelleg DB uusne.
+     * queue iin hiih uildel ni 
      */
     public function handle(): void
     {
 
-        // transaction + lockForUpdate — олон job
+        // transaction hiih
         $loan = DB::transaction(function () {
             $book = Book::lockForUpdate()->find($this->data['book_id']);
 
-            // Ном үлдээгүй бол зээллэг үүсгэхгүй, зөвхөн тэмдэглэнэ
             if (! $book || $book->available_copies < 1) {
                 Log::warning('Зээл амжилтгүй: ном үлдээгүй', [
                     'book_id' => $this->data['book_id'],
                     'user_id' => $this->userId,
                 ]);
-                return null;
-                
+
+                throw new \RuntimeException(
+                    'Ном үлдээгүй байна (book_id: ' . $this->data['book_id'] . ')'
+                );
             }
 
-            // Зээллэг ЭНД DB-д бичигдэнэ
+            // DB ruu nemeh uil yvts
             $loan = Loan::create([
                 'user_id'   => $this->userId,
                 'book_id'   => $book->id,

@@ -8,35 +8,31 @@ use Illuminate\Auth\Events\Verified; // Laravel iin uuriinh event
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
+// verify route ruu handahad ajillah controller
 class EmailVerificationController extends Controller
 {
     /**
-     * Мэйл дэх холбоосыг дарахад ажиллана.
-     *
-     * Энэ route-д auth байхгүй — хэрэглэгч мэйлээ хөтчөөс нээж дардаг тул
-     * Sanctum token байхгүй. Оронд нь хамгаалалт нь 2 давхар:
-     *   1) 'signed' middleware — URL-ийн гарын үсэг + хугацааг шалгана
-     *   2) доорх hash шалгалт — холбоосыг тухайн и-мэйл хаягтай холбоно
+     * verify hiih function
      */
     public function verify(Request $request, string $id, string $hash)
     {
-        $user = User::find($id);
+        $user = User::find($id); // user iig oloh
 
-        // hash_equals — тэнцүү эсэхийг тогтмол хугацаанд шалгаж timing attack-аас сэргийлнэ
+        // user iig oldohgui, esvel hash buruu bol redirect hiine.
         if (! $user || ! hash_equals($hash, sha1($user->getEmailForVerification()))) {
-            Log::warning('И-мэйл баталгаажуулах буруу холбоос.', ['id' => $id]);
+            Log::warning('И-мэйл баталгаажуулах буруу холбоос.', ['id' => $id]); // log hiih
 
-            return redirect($this->frontend('error'));
+            return redirect($this->frontend('error')); // aldaa zaaana
         }
 
+        // ali hediin verified baival redirect hiine
         if ($user->hasVerifiedEmail()) {
-            return redirect($this->frontend('already'));
+            return redirect($this->frontend('already')); // ali hediin ajilsang ni zaana
         }
 
-        $user->markEmailAsVerified();
+        $user->markEmailAsVerified(); 
 
-        // markEmailAsVerified() өөрөө event шиддэггүй тул гараар шидэж байна.
-        // Ирээдүйд "тавтай морил" мэйл гэх мэт listener-ийг үүнд хавсаргаж болно.
+        // event uusgeh ba endees listener eer sonsono
         event(new Verified($user));
 
         Log::info('И-мэйл баталгаажлаа.', [
@@ -44,33 +40,32 @@ class EmailVerificationController extends Controller
             'email'   => $user->email,
         ]);
 
+        // amjilttai bolsong damjuulah. 
         return redirect($this->frontend('success'));
     }
 
     /**
-     * Баталгаажуулах холбоосыг дахин илгээх (хугацаа дууссан / мэйл ирээгүй тохиолдолд).
-     *
-     * Энэ route-д auth БАЙХГҮЙ. Шалтгаан: хатуу горимд баталгаажаагүй хэрэглэгчид
-     * token огт өгөгддөггүй тул 'auth:sanctum' дор тавибал хэзээ ч хандаж чадахгүй.
-     * Оронд нь и-мэйл хаягаар нь хайна.
+     * dahin link yvuulah function
      */
     public function resend(Request $request)
     {
+        // tuhain email shaardlaga biyluulj baigaa eshiig ni shalgah
         $validated = $request->validate([
             'email' => 'required|string|email',
         ]);
 
         $user = User::where('email', $validated['email'])->first();
 
-        // Баталгаажаагүй хэрэглэгч олдсон тохиолдолд Л илгээнэ.
+        // batalgaajaagui hereglegch oldvol mail yvuulah job ruu yvuulna.
         if ($user && ! $user->hasVerifiedEmail()) {
             try {
-                SendVerifyEmailJob::dispatchSync($user);
+                SendVerifyEmailJob::dispatchSync($user); // queue ashiglahguin tuld dispatchSync();
             } catch (\Throwable $e) {
-                // failed() дотор аль хэдийн лог бичигдсэн.
+                // failed() doto log bichigdsen ba aldaanii hariu
                 return response()->json(['message' => 'И-мэйл илгээхэд алдаа гарлаа.'], 500);
             }
         } else {
+            // user baihgu esdvel hereglegch ali hediin verified baigaag ni iltgeh
             Log::info('Дахин илгээх хүсэлт: хэрэглэгч алга эсвэл аль хэдийн баталгаажсан.', [
                 'email' => $validated['email'],
             ]);

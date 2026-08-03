@@ -16,7 +16,7 @@ class LoanRegistered implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
-     * Create a new event instance.
+     * baiguulagch
      */
     public function __construct(public Loan $loan)
     {
@@ -24,9 +24,7 @@ class LoanRegistered implements ShouldBroadcast
     }
 
     /**
-     * Get the channels the event should broadcast on.
-     *
-     * @return array<int, Channel>
+     * listener luu uguh heseg 
      */
     public function broadcastOn(): array
     {   

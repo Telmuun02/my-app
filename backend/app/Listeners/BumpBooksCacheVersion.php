@@ -5,13 +5,12 @@ namespace App\Listeners;
 use App\Events\LoanRegistered;
 use Illuminate\Support\Facades\Cache;
 
+// Cache iig loan register uildel hiigdeh uyd ni shine version uusgej shinechleh
+
 class BumpBooksCacheVersion
 {
     /**
-     * Зээл үүссэн тул номын жагсаалтын cache хуучирсан:
-     * available_copies буурсан ч cache хуучин утгыг барьсаар байна.
-     * Version-ыг нэмснээр бүх хуучин books.v{N}.* түлхүүр хүрэшгүй болж,
-     * дараагийн хүсэлт DB-ээс шинээр уншина.
+     * shineer version uusgeh 
      */
     public function handle(LoanRegistered $event): void
     {
