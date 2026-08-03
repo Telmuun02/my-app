@@ -26,19 +26,22 @@ class SendVerifyEmailJob implements ShouldQueue
     
     public function __construct(public User $user)
     {
-        //
+        // baiguulagch 
     }
 
     public function handle(): void
     {
+        // mail ilgeej bn
         Mail::to($this->user->email)->send(new VerifyEmailMail($this->user));
 
+        // log hiih
         Log::info('Баталгаажуулах и-мэйл илгээгдлээ.', [
             'user_id' => $this->user->id,
             'email'   => $this->user->email,
         ]);
     }
 
+    // exception uusvel hiih uildel 
     public function failed(Throwable $exception): void
     {
         Log::error('Баталгаажуулах и-мэйл илгээгдсэнгүй.', [
