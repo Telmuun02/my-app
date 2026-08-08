@@ -59,7 +59,7 @@ class EmailVerificationController extends Controller
         // batalgaajaagui hereglegch oldvol mail yvuulah job ruu yvuulna.
         if ($user && ! $user->hasVerifiedEmail()) {
             try {
-                SendVerifyEmailJob::dispatchSync($user); // queue ashiglahguin tuld dispatchSync();
+                SendVerifyEmailJob::dispatch($user); // queue ashiglahguin tuld dispatchSync();
             } catch (\Throwable $e) {
                 // failed() doto log bichigdsen ba aldaanii hariu
                 return response()->json(['message' => 'И-мэйл илгээхэд алдаа гарлаа.'], 500);

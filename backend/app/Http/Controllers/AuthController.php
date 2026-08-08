@@ -7,8 +7,8 @@ use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash; 
+use Illuminate\Support\Facades\Log;  // pattern 
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller

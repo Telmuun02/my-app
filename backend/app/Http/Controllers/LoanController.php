@@ -47,6 +47,11 @@ class LoanController extends Controller
         return response()->json($loan->load(['book', 'user']));
     }
 
+    /*
+     *
+     * @param $load -
+     * @return \Illuminate\Http\JsonResponse - 
+     */
     public function returnBook(Loan $loan)
     {
         if ($loan->return_date !== null) {
@@ -70,7 +75,8 @@ class LoanController extends Controller
         }
 
         $loan->delete();
-
+ 
+    
         return response()->json(['message' => 'Зээлийн бичлэг устгагдлаа.']);
     }
 }

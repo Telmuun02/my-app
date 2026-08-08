@@ -4,7 +4,8 @@ use App\Http\Controllers\EmailVerificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+dd(config('queue.default'));
+return view('welcome');
 });
 
 /*
