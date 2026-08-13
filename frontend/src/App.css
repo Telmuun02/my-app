@@ -1,83 +1,45 @@
-/* ===================== Layout ===================== */
+/* ===================================================================
+   ДУНДЫН давхарга — хоёр ба түүнээс дээш газар давтагдаж байсан бүх
+   загвар энд нэг л удаа тодорхойлогдоно. Компонентууд эдгээрийн дээр
+   зөвхөн ялгаагаа нэмнэ (base + modifier):
+
+       <div className="book-cover card__cover">
+
+   Ачаалах дараалал: index.css → App.css → компонентуудын CSS.
+   Тиймээс ижил жинтэй (specificity) үед компонентын дүрэм ялна —
+   энэ нь зориуд. Дарааллыг main.jsx хангадаг.
+   =================================================================== */
+
 .app {
   min-height: 100vh;
 }
 
-.layout {
-  display: flex;
-  align-items: flex-start;
-  gap: 40px;
-  max-width: 1280px;
+/* Sidebar-гүй энгийн хуудасны төв багана (BookDetail, NotFound) */
+.page {
+  max-width: 1000px;
   margin: 0 auto;
   padding: 32px 24px 64px;
 }
 
-/* ===================== Header ===================== */
-.header {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  padding: 14px 24px;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg);
-}
-
-.header__brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0;
-  cursor: pointer;
-}
-
-.header__logo {
-  display: grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  background: var(--primary);
-  color: #fff;
-}
-
-.header__name {
-  font-size: 20px;
-  font-weight: 700;
-}
-
-.header__search {
-  position: relative;
-  flex: 1;
-  max-width: 560px;
-  margin: 0 auto;
-}
-
-.header__search input {
-  width: 100%;
-  padding: 11px 16px 11px 42px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: var(--surface);
+/* "← Каталог руу буцах" маягийн буцах холбоос */
+.back-link {
+  display: inline-block;
+  margin-bottom: 24px;
   font-size: 15px;
-  color: var(--text);
-}
-
-.header__search .search-icon {
-  position: absolute;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
   color: var(--text-muted);
 }
-
-.header__auth {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+.back-link:hover {
+  color: var(--primary);
 }
 
-/* ===================== Товчнууд ===================== */
-/* Эдгээр нь <button> ба <a> (Link) хоёуланд ашиглагдана — тиймээс
+/* Ачаалж буй / хоосон / алдааны мөр — Catalog, BookDetail, NotFound */
+.empty-state {
+  color: var(--text-muted);
+  padding: 40px 0;
+}
+
+/* ===================== Товчнууд =====================
+   Эдгээр нь <button> ба <a> (Link) хоёуланд ашиглагдана — тиймээс
    inline-block + center нь линк хэлбэрээр ч товч шиг харагдуулна. */
 .btn-text {
   display: inline-block;
@@ -92,215 +54,39 @@
 .btn-primary {
   display: inline-block;
   padding: 10px 22px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--primary);
   color: #fff;
   font-size: 15px;
   font-weight: 600;
   text-align: center;
 }
+.btn-primary:hover {
+  background: var(--primary-hover);
+}
 .btn-primary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-.btn-primary:hover {
-  background: var(--primary-hover);
 }
 .btn-primary:disabled:hover {
   background: var(--primary);
 }
 
-/* ===================== Sidebar ===================== */
-.sidebar {
-  flex: 0 0 200px;
-  position: sticky;
-  top: 24px;
-}
-
-.filter-group {
-  margin-bottom: 32px;
-}
-
-.filter-group__title {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin: 0 0 12px 12px;
-}
-
-.filter-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.filter-item {
-  width: 100%;
-  text-align: left;
-  padding: 10px 14px;
-  border-radius: var(--radius-sm);
-  font-size: 15px;
-  color: var(--text);
-}
-.filter-item:hover {
-  background: rgba(0, 0, 0, 0.04);
-}
-.filter-item--active {
-  background: var(--active-bg);
-  font-weight: 600;
-}
-
-/* ===================== Content ===================== */
-.content {
-  flex: 1;
-  min-width: 0;
-}
-
-.content__head h1 {
-  font-size: 34px;
-  letter-spacing: -0.02em;
-}
-
-.content__count {
-  margin: 6px 0 0;
-  color: var(--text-muted);
-  font-size: 15px;
-}
-
-.content__search {
-  position: relative;
-  margin: 24px 0 28px;
-}
-
-.content__search input {
-  width: 100%;
-  padding: 13px 16px 13px 44px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
-  font-size: 15px;
-  color: var(--text);
-}
-
-.content__search .search-icon {
-  position: absolute;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-muted);
-}
-
-.content__empty {
-  color: var(--text-muted);
-  padding: 40px 0;
-}
-
-/* ===================== Grid + Card ===================== */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-  gap: 28px;
-}
-
-.card {
-  display: flex;
-  flex-direction: column;
-}
-
-/* Картын дарж болох хэсэг (хавтас + мэдээлэл) — /books/:id рүү заасан Link.
-   Borrow товч энэ линкийн гадна байдаг тул давхцаж дарагдахгүй. */
-.card__link {
+/* Бүтэн өргөнтэй хувилбар. Өмнө нь .btn-block нь .btn-primary-гийн бүх
+   мөрийг давтаж бичсэн байсан — одоо зөвхөн ЯЛГААГ нь нэмнэ:
+       <button className="btn-primary btn-block"> */
+.btn-block {
   display: block;
-}
-.card__link:hover .card__cover {
-  transform: translateY(-4px);
-}
-.card__link:hover .card__title {
-  color: var(--primary);
+  width: 100%;
+  margin-top: 4px;
+  padding: 13px;
 }
 
-.card__cover {
-  position: relative;
-  transition: transform 0.18s ease;
-  aspect-ratio: 3 / 4;
-  border-radius: var(--radius);
-  padding: 18px;
-  color: #fff;
-  overflow: hidden;
-  box-shadow: var(--shadow);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.card__cover-category {
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.55);
-}
-
-.card__cover-mark {
-  position: absolute;
-  right: 14px;
-  bottom: 78px;
-  width: 46px;
-  height: 46px;
-  color: rgba(255, 255, 255, 0.12);
-}
-
-.card__cover-title {
-  font-size: 17px;
-  line-height: 1.25;
-  font-weight: 700;
-}
-
-.card__cover-author {
-  margin: 6px 0 0;
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.card__body {
-  padding: 14px 2px 0;
-}
-
-.card__title {
-  font-size: 16px;
-  line-height: 1.3;
-  font-weight: 700;
-}
-
-.card__author {
-  margin: 4px 0 10px;
-  font-size: 14px;
-  color: var(--text-muted);
-}
-
-.card__badge {
-  display: inline-block;
-  padding: 4px 12px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-.card__footer {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 14px;
-}
-
+/* ===================== Availability badge =====================
+   BookCard болон BookDetail хоёулаа ашиглана. */
 .pill {
   padding: 8px 14px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: 13px;
   font-weight: 600;
 }
@@ -309,84 +95,46 @@
   color: var(--avail-text);
 }
 .pill--out {
-  background: #ecebe3;
+  background: var(--surface-muted);
   color: var(--text-muted);
 }
 
-.btn-borrow {
-  flex: 1;
-  padding: 8px 12px;
-  border-radius: 999px;
-  background: #ecebe3;
-  color: var(--text-muted);
-  font-size: 13px;
-  font-weight: 600;
-}
-.btn-borrow:disabled {
-  cursor: not-allowed;
-}
-
-/* ===================== Pagination ===================== */
-.pagination {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 40px;
-}
-
-.page-btn {
-  min-width: 40px;
-  height: 40px;
-  padding: 0 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  font-size: 15px;
-  color: var(--text);
-}
-.page-btn:hover:not(:disabled) {
-  border-color: var(--primary);
-}
-.page-btn--active {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: #fff;
-  font-weight: 600;
-}
-.page-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-/* ============ Номын дэлгэрэнгүй хуудас (/books/:id) ============ */
-.detail {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 32px 24px 64px;
-}
-
-.detail__back {
+/* Хүрээтэй ангиллын шошго — BookCard ба BookDetail (өмнө нь .card__badge
+   болон .detail__badge гэж хоёр ижил блок байсан). */
+.badge-outline {
   display: inline-block;
-  margin-bottom: 24px;
-  font-size: 15px;
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  font-size: 12px;
   color: var(--text-muted);
 }
-.detail__back:hover {
-  color: var(--primary);
+
+/* ===================== Мэдэгдлийн хайрцаг =====================
+   Өмнө нь .verify__ok ба .detail__message хоёр яг ижил байсан. */
+.notice-ok,
+.notice-err {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.notice-ok {
+  background: var(--avail-bg);
+  color: var(--avail-text);
+}
+.notice-err {
+  background: var(--err-bg);
+  color: var(--err-text);
 }
 
-/* Зүүн талд тогтмол өргөнтэй хавтас, баруун талд уян мэдээлэл */
-.detail__grid {
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 40px;
-  align-items: start;
-}
-
-.detail__cover {
+/* ===================== Номын хавтас =====================
+   BookCard-ийн жижиг карт ба BookDetail-ийн том хавтас хоёрын ДУНДЫН
+   хэсэг. Ялгаа нь зөвхөн padding, хэмжээ — тэр нь тус тусын файлд. */
+.book-cover {
   aspect-ratio: 3 / 4;
   border-radius: var(--radius);
-  padding: 22px;
   color: #fff;
   overflow: hidden;
   box-shadow: var(--shadow);
@@ -395,266 +143,55 @@
   justify-content: space-between;
 }
 
-.detail__cover-img {
-  align-self: center;
-  width: 120px;
-  height: 174px;
+.book-cover__category {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.book-cover__author {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Номын зураг. Хэмжээг тус тусын файл өгнө. Өмнө нь BookCard дотор
+   inline style-аар бичигдсэн байсныг CSS рүү гаргав. */
+.book-cover__img {
   object-fit: cover;
   border-radius: 4px;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
 }
 
-.detail__cover-title {
-  font-size: 20px;
-  line-height: 1.25;
+/* ===================== Хайлтын талбар =====================
+   Header дээрх ба Catalog доторх хайлт бараг ижил байсан. Дундын хэсэг
+   энд; өргөн/padding/ирмэг зэрэг ялгаа нь тус тусын файлд. */
+.search-box {
+  position: relative;
 }
 
-.detail__title {
-  margin: 12px 0 0;
-  font-size: 34px;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-}
-
-.detail__authors {
-  margin: 8px 0 0;
-  font-size: 17px;
+.search-box .search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
   color: var(--text-muted);
 }
 
-/* Мета мэдээлэл — <dl> ашигласан нь "нэр → утга" хосыг семантик болгож байна */
-.detail__meta {
-  margin: 28px 0 0;
-  padding: 4px 0;
-  border-top: 1px solid var(--border);
-}
-
-.detail__row {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border);
-}
-
-.detail__row dt {
-  font-size: 14px;
-  color: var(--text-muted);
-}
-
-.detail__row dd {
-  margin: 0;
+.search-box input {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: var(--surface);
   font-size: 15px;
-  font-weight: 600;
+  color: var(--text);
 }
 
-.detail__actions {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-top: 28px;
-}
-
-.detail__message {
-  margin: 16px 0 0;
-  padding: 12px 14px;
-  border-radius: var(--radius);
-  background: var(--avail-bg);
-  color: var(--avail-text);
-  font-size: 14px;
-}
-
-/* ===================== Auth (Sign in / Register) ===================== */
-.auth {
-  max-width: 440px;
-  margin: 56px auto;
-  padding: 0 24px;
-  text-align: center;
-}
-
-.auth__logo {
+/* ===================== Дугуй лого =====================
+   Header-ийн жижиг лого ба Auth хуудсын том лого — өнгө нь ижил. */
+.logo-badge {
   display: grid;
   place-items: center;
-  width: 56px;
-  height: 56px;
-  margin: 0 auto 20px;
-  border-radius: 16px;
   background: var(--primary);
   color: #fff;
-}
-
-.auth__title {
-  font-size: 30px;
-  letter-spacing: -0.02em;
-}
-
-.auth__subtitle {
-  margin: 8px 0 0;
-  color: var(--text-muted);
-}
-
-.auth__card {
-  margin-top: 28px;
-  padding: 28px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  box-shadow: var(--shadow);
-  text-align: left;
-}
-
-.auth__footer {
-  margin-top: 24px;
-  color: var(--text-muted);
-  font-size: 15px;
-}
-
-.auth__link {
-  padding: 0;
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--primary);
-}
-.auth__link:hover {
-  text-decoration: underline;
-}
-
-.auth-form {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.field__label {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.field input {
-  width: 100%;
-  padding: 12px 16px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: var(--bg);
-  font-size: 15px;
-  color: var(--text);
-}
-.field input:focus {
-  outline: none;
-  border-color: var(--primary);
-}
-
-.btn-block {
-  margin-top: 4px;
-  padding: 13px;
-  border-radius: 999px;
-  background: var(--primary);
-  color: #fff;
-  font-size: 15px;
-  font-weight: 600;
-}
-.btn-block:hover {
-  background: var(--primary-hover);
-}
-
-.auth-demo {
-  margin-top: 4px;
-  padding: 14px 16px;
-  border-radius: var(--radius);
-  background: #ecebe3;
-  font-family: ui-monospace, Consolas, monospace;
-  font-size: 13px;
-  color: var(--text-muted);
-}
-.auth-demo p {
-  margin: 0 0 4px;
-}
-.auth-demo p:last-child {
-  margin-bottom: 0;
-}
-.auth-demo code {
-  color: var(--text);
-}
-
-/* ============ И-мэйл баталгаажуулалт (VerifyNotice / EmailVerified) ============ */
-.verify {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.verify__lead {
-  margin: 0;
-  font-size: 15px;
-  line-height: 1.5;
-  color: var(--text);
-}
-
-.verify__hint {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.55;
-  color: var(--text-muted);
-}
-
-/* Амжилт / мэдээлэл — ногоон badge өнгөө ашиглав */
-.verify__ok {
-  margin: 0;
-  padding: 12px 14px;
-  border-radius: var(--radius);
-  background: var(--avail-bg);
-  color: var(--avail-text);
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-/* Алдаа */
-.verify__err {
-  margin: 0;
-  padding: 12px 14px;
-  border-radius: var(--radius);
-  background: #f7dcd8;
-  color: #8c2f22;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.verify .btn-block:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-/* ===================== Responsive ===================== */
-@media (max-width: 860px) {
-  .layout {
-    flex-direction: column;
-    gap: 24px;
-  }
-  .sidebar {
-    position: static;
-    flex-basis: auto;
-    width: 100%;
-  }
-  .filter-list {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-  .header__search {
-    display: none;
-  }
-  /* Дэлгэрэнгүй хуудас: хоёр багана → нэг багана */
-  .detail__grid {
-    grid-template-columns: 1fr;
-    gap: 28px;
-  }
-  .detail__cover {
-    max-width: 280px;
-  }
 }

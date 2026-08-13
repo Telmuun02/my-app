@@ -1,0 +1,9 @@
+/* NotFound.jsx (path="*").
+   Хүрээ нь дундын .page, буцах холбоос нь .back-link (App.css). */
+
+.notfound__code {
+  font-size: 64px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--text-muted);
+}

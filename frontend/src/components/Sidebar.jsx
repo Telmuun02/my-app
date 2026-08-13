@@ -1,3 +1,5 @@
+import "./Sidebar.css";
+
 // Зүүн талын шүүлтүүр: Ангилал ба Боломж (availability).
 // categories нь backend-ээс ирсэн ангиллын нэрсийн жагсаалт (Catalog дамжуулна).
 // Идэвхтэй утга бүрийг App/Catalog удирдана.

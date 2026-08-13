@@ -4,6 +4,7 @@ import BookCard from "../components/BookCard";
 import Pagination from "../components/Pagination";
 import { SearchIcon } from "../components/icons";
 import client from "../api/client";
+import "./Catalog.css";
 
 // API-ийн ном → UI-д хэрэгтэй энгийн бүтэц рүү хөрвүүлэх.
 // BookResource: { authors: ["Нэр"], category: "Нэр", available: N }
@@ -109,7 +110,7 @@ function Catalog({ query, onQueryChange, user }) {
           <p className="content__count">{totalCount} books found</p>
         </div>
 
-        <div className="content__search">
+        <div className="search-box content__search">
           <SearchIcon />
           <input
             type="search"
@@ -120,11 +121,11 @@ function Catalog({ query, onQueryChange, user }) {
         </div>
 
         {loading ? (
-          <p className="content__empty">Loading…</p>
+          <p className="empty-state">Loading…</p>
         ) : error ? (
-          <p className="content__empty">{error}</p>
+          <p className="empty-state">{error}</p>
         ) : books.length === 0 ? (
-          <p className="content__empty">No books match your filters.</p>
+          <p className="empty-state">No books match your filters.</p>
         ) : (
           <>
             <div className="grid">

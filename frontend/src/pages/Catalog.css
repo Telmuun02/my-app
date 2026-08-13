@@ -1,0 +1,50 @@
+/* Catalog.jsx (хуудас "/") — sidebar + агуулгын хоёр баганат байрлал.
+   Хайлтын талбарын дундын хэсэг нь .search-box (App.css). */
+
+.layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 40px;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.content__head h1 {
+  font-size: 34px;
+  letter-spacing: -0.02em;
+}
+
+.content__count {
+  margin: 6px 0 0;
+  color: var(--text-muted);
+  font-size: 15px;
+}
+
+.content__search {
+  margin: 24px 0 28px;
+}
+
+.content__search input {
+  padding: 13px 16px 13px 44px;
+  border-radius: var(--radius);
+}
+
+/* Номын картуудын сүлжээ */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 28px;
+}
+
+@media (max-width: 860px) {
+  .layout {
+    flex-direction: column;
+    gap: 24px;
+  }
+}

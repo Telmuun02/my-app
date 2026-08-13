@@ -11,16 +11,27 @@
   --primary: #2f5233;
   --primary-hover: #264429;
 
-  /* Availability (боломжтой) badge */
+  /* Бүдэг гадаргуу — pill--out, btn-borrow, auth-demo гурвуулаа ашиглана */
+  --surface-muted: #ecebe3;
+
+  /* Амжилт / мэдээлэл (боломжтой badge, ногоон мэдэгдэл) */
   --avail-bg: #c9e8d6;
   --avail-text: #2f5233;
+
+  /* Алдаа (улаан мэдэгдэл) */
+  --err-bg: #f7dcd8;
+  --err-text: #8c2f22;
 
   /* Идэвхтэй sidebar item */
   --active-bg: #d8dccf;
 
+  /* Хулганы доорх бүдэг дэвсгэр (filter item, сагсны товч) */
+  --hover-bg: rgba(0, 0, 0, 0.05);
+
   /* Хэмжээ */
   --radius: 12px;
   --radius-sm: 8px;
+  --radius-pill: 999px; /* бүрэн дугуйрсан ирмэг — 9 газар давтагдаж байсан */
   --shadow: 0 6px 20px -8px rgba(0, 0, 0, 0.15);
 
   font-family: system-ui, "Segoe UI", Roboto, sans-serif;

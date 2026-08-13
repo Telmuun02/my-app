@@ -10,7 +10,7 @@ import Register from "./pages/Register";
 import EmailVerified from "./pages/EmailVerified";
 import NotFound from "./pages/NotFound";
 import client, { setToken, clearToken } from "./api/client";
-import "./App.css";
+// App.css-ийг main.jsx ачаална (дарааллын тухай тайлбарыг тэндээс уншина уу).
 
 // Хуудас дахин ачаалахад хэрэглэгч гарчихгүйн тулд localStorage-оос сэргээнэ.
 function loadStoredUser() {

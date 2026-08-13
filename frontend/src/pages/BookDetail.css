@@ -1,0 +1,91 @@
+/* BookDetail.jsx (хуудас "/books/:id").
+   Гадна хүрээ нь дундын .page, хавтас нь .book-cover, шошго нь
+   .badge-outline, мэдэгдэл нь .notice-ok (бүгд App.css-д).
+   Энд зөвхөн энэ хуудсанд ЛЭ хамаарах загвар үлдэнэ. */
+
+/* Зүүн талд тогтмол өргөнтэй хавтас, баруун талд уян мэдээлэл */
+.detail__grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+/* .book-cover дээр нэмэх ялгаа: илүү том padding */
+.detail__cover {
+  padding: 22px;
+}
+
+/* Зургийн ерөнхий загвар .book-cover__img-д — энд зөвхөн хэмжээ/байрлал */
+.detail__cover-img {
+  align-self: center;
+  width: 120px;
+  height: 174px;
+}
+
+.detail__cover-title {
+  font-size: 20px;
+  line-height: 1.25;
+}
+
+.detail__title {
+  margin: 12px 0 0;
+  font-size: 34px;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.detail__authors {
+  margin: 8px 0 0;
+  font-size: 17px;
+  color: var(--text-muted);
+}
+
+/* Мета мэдээлэл — <dl> ашигласан нь "нэр → утга" хосыг семантик болгож байна */
+.detail__meta {
+  margin: 28px 0 0;
+  padding: 4px 0;
+  border-top: 1px solid var(--border);
+}
+
+.detail__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.detail__row dt {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.detail__row dd {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.detail__actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 28px;
+}
+
+/* Зээлсэн үеийн мэдэгдэл нь .notice-ok — энд зөвхөн зай */
+.detail__message {
+  margin-top: 16px;
+}
+
+/* Нарийн дэлгэц: хоёр багана → нэг багана */
+@media (max-width: 860px) {
+  .detail__grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .detail__cover {
+    max-width: 280px;
+  }
+}

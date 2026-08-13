@@ -1,11 +1,15 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import { BookIcon, SearchIcon } from "./icons";
+import "./Header.css";
 
-// Дээд header: лого, дунд хайлтын талбар, баруун талд Sign in / Register.
+// Дээд header: лого, дунд хайлтын талбар, баруун талд сагс + Sign in / Register.
 // query, onQueryChange — хайлт (controlled input, App удирдана).
 // Хуудас солих нь <Link> буюу URL-аар явна (өмнөх onNavigate prop хэрэггүй болсон).
 // user — нэвтэрсэн хэрэглэгч (эсвэл null). onLogout — гарах.
-function Header({ query, onQueryChange, user, onLogout }) {
+// cartCount — сагсан дахь номын тоо; 0 үед badge харагдахгүй.
+// onCartClick — сагс дарахад (одоохондоо заавал биш).
+function Header({ query, onQueryChange, user, onLogout, cartCount = 0, onCartClick }) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
@@ -19,13 +23,13 @@ function Header({ query, onQueryChange, user, onLogout }) {
   return (
     <header className="header">
       <Link to="/" className="header__brand">
-        <span className="header__logo" aria-hidden="true">
+        <span className="logo-badge header__logo" aria-hidden="true">
           <BookIcon />
         </span>
         <span className="header__name">Folio</span>
       </Link>
 
-      <div className="header__search">
+      <div className="search-box header__search">
         <SearchIcon />
         <input
           type="search"
@@ -36,6 +40,20 @@ function Header({ query, onQueryChange, user, onLogout }) {
       </div>
 
       <div className="header__auth">
+        {/* Сагс. Тоог MUI-ийн Badge-ээр биш, өөрсдийн CSS-ээр наана —
+            хэрэгтэй нь ердөө "0 үед нуух" + булан дээр байрлуулах хоёр. */}
+        <button
+          type="button"
+          className="header__cart"
+          aria-label={`Сагс (${cartCount})`}
+          onClick={onCartClick}
+        >
+          <AddShoppingCartIcon fontSize="small" />
+          {cartCount > 0 && (
+            <span className="header__cart-count">{cartCount > 99 ? "99+" : cartCount}</span>
+          )}
+        </button>
+
         {user ? (
           // Нэвтэрсэн үед: нэр + Sign out
           <>

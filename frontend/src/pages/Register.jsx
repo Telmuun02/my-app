@@ -108,7 +108,7 @@ function Register() {
 
         {error && <p style={{ color: "#c0392b", fontSize: "0.9rem" }}>{error}</p>}
 
-        <button type="submit" className="btn-block" disabled={loading}>
+        <button type="submit" className="btn-primary btn-block" disabled={loading}>
           {loading ? "Creating…" : "Create account"}
         </button>
       </form>

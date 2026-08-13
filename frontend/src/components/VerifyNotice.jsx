@@ -1,5 +1,6 @@
 import { useState } from "react";
 import client from "../api/client";
+import "./VerifyNotice.css";
 
 // Баталгаажуулах холбоосыг дахин илгээх самбар.
 // Register (бүртгэлийн дараа) болон SignIn (403 авсан үед) хоёулаа ашиглана.
@@ -40,12 +41,17 @@ function VerifyNotice({ email }) {
         хүчингүй болно. Ирээгүй бол спам хавтсаа шалгаарай.
       </p>
 
-      <button type="button" className="btn-block" onClick={resend} disabled={sending}>
+      <button
+        type="button"
+        className="btn-primary btn-block"
+        onClick={resend}
+        disabled={sending}
+      >
         {sending ? "Илгээж байна…" : "Холбоосыг дахин илгээх"}
       </button>
 
-      {note && <p className="verify__ok">{note}</p>}
-      {error && <p className="verify__err">{error}</p>}
+      {note && <p className="notice-ok">{note}</p>}
+      {error && <p className="notice-err">{error}</p>}
     </div>
   );
 }

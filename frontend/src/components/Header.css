@@ -1,0 +1,88 @@
+/* Header.jsx-ийн загвар — App.css дахь дундын хэв маягуудын ЯЛГАА нь.
+   Хэрэглээ: .logo-badge + .header__logo, .search-box + .header__search */
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.header__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* Өнгө/төвлөрүүлэлт нь .logo-badge-аас — энд зөвхөн хэмжээ */
+.header__logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+}
+
+.header__name {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+/* Хүрээ/дэвсгэр/icon байрлал нь .search-box-оос */
+.header__search {
+  flex: 1;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.header__search input {
+  padding: 11px 16px 11px 42px;
+  border-radius: var(--radius-pill);
+}
+
+.header__auth {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Сагсны дугуй товч. position: relative нь доторх тоог булан дээр нь
+   absolute байрлуулах тулгуур болно. */
+.header__cart {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-pill);
+  color: var(--text);
+}
+.header__cart:hover {
+  background: var(--hover-bg);
+  color: var(--primary);
+}
+
+/* Сагсан дахь тоо. 0 үед JSX нь энэ элементийг огт render хийхгүй. */
+.header__cart-count {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--radius-pill);
+  background: var(--primary);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 18px;
+  text-align: center;
+}
+
+@media (max-width: 860px) {
+  .header__search {
+    display: none;
+  }
+}

@@ -1,0 +1,106 @@
+/* AuthLayout.jsx-ийн загвар — Sign in / Register / EmailVerified бүгд
+   энэ бүрхүүлийг ашигладаг тул доторх формын загвар ч энд байна.
+   Товчнууд (.btn-primary .btn-block) App.css-д. */
+
+.auth {
+  max-width: 440px;
+  margin: 56px auto;
+  padding: 0 24px;
+  text-align: center;
+}
+
+/* Өнгө/төвлөрүүлэлт нь .logo-badge-аас — энд зөвхөн хэмжээ */
+.auth__logo {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 20px;
+  border-radius: 16px;
+}
+
+.auth__title {
+  font-size: 30px;
+  letter-spacing: -0.02em;
+}
+
+.auth__subtitle {
+  margin: 8px 0 0;
+  color: var(--text-muted);
+}
+
+.auth__card {
+  margin-top: 28px;
+  padding: 28px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  text-align: left;
+}
+
+.auth__footer {
+  margin-top: 24px;
+  color: var(--text-muted);
+  font-size: 15px;
+}
+
+.auth__link {
+  padding: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--primary);
+}
+.auth__link:hover {
+  text-decoration: underline;
+}
+
+/* ===== Форм ===== */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field__label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.field input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--bg);
+  font-size: 15px;
+  color: var(--text);
+}
+.field input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.auth-demo {
+  margin-top: 4px;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: var(--surface-muted);
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.auth-demo p {
+  margin: 0 0 4px;
+}
+.auth-demo p:last-child {
+  margin-bottom: 0;
+}
+.auth-demo code {
+  color: var(--text);
+}

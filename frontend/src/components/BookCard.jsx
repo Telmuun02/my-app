@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { CARD_BACKGROUND_URL, COVER_GRADIENTS } from "../data/books";
+import "./BookCard.css";
 
 // Нэг номын карт: өнгөт хавтас + доор нь мэдээлэл, availability, borrow товч.
 // user — нэвтэрсэн эсэх (зээлэх товч идэвхжинэ). onBorrow(id) — зээлэх дуудалт.
@@ -23,7 +24,7 @@ function BookCard({ book, user, onBorrow }) {
             дээрх зураг. multiply нь градиентын өнгөөр зургийг будаж холино —
             ингэснээр ангилал бүрийн өнгө хадгалагдаж, зураг ч мөн харагдана. */}
         <div
-          className="card__cover"
+          className="book-cover card__cover"
           style={{
             backgroundImage: `${cover}, url(${CARD_BACKGROUND_URL})`,
             backgroundSize: "cover",
@@ -31,31 +32,24 @@ function BookCard({ book, user, onBorrow }) {
             backgroundBlendMode: "multiply",
           }}
         >
-          <span className="card__cover-category">{book.category}</span>
+          <span className="book-cover__category">{book.category}</span>
 
           {/* Номын зураг — URL нь backend-ээс (Cloudinary) ирнэ.
               Одоохондоо бүх ном ижил зурагтай; хэмжээ, формат Cloudinary тал дээр
               тохируулагдсан тул энд зөвхөн харуулна. */}
           {!coverFailed && book.cover_url && (
             <img
-              className="card__cover-img"
+              className="book-cover__img card__cover-img"
               src={book.cover_url}
               alt={book.title}
               loading="lazy"
               onError={() => setCoverFailed(true)}
-              style={{
-                width: "90px",
-                height: "130px",
-                objectFit: "cover",
-                borderRadius: "4px",
-                boxShadow: "0 6px 16px rgba(0,0,0,0.35)",
-              }}
             />
           )}
 
           <div className="card__cover-text">
             <h3 className="card__cover-title">{book.title}</h3>
-            <p className="card__cover-author">{book.author}</p>
+            <p className="book-cover__author">{book.author}</p>
           </div>
         </div>
 
@@ -63,7 +57,7 @@ function BookCard({ book, user, onBorrow }) {
         <div className="card__body">
           <h3 className="card__title">{book.title}</h3>
           <p className="card__author">{book.author}</p>
-          <span className="card__badge">{book.category}</span>
+          <span className="badge-outline">{book.category}</span>
         </div>
       </Link>
 

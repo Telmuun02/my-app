@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { CARD_BACKGROUND_URL, COVER_GRADIENTS } from "../data/books";
 import client from "../api/client";
+import "./BookDetail.css";
 
 // Нэг номын дэлгэрэнгүй хуудас — URL: /books/:id
 //
@@ -87,17 +88,17 @@ function BookDetail({ user }) {
 
   if (loading) {
     return (
-      <div className="detail">
-        <p className="content__empty">Loading…</p>
+      <div className="page">
+        <p className="empty-state">Loading…</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="detail">
-        <p className="content__empty">{error}</p>
-        <Link to="/" className="btn-text">
+      <div className="page">
+        <p className="empty-state">{error}</p>
+        <Link to="/" className="back-link">
           ← Каталог руу буцах
         </Link>
       </div>
@@ -108,17 +109,17 @@ function BookDetail({ user }) {
   const cover = COVER_GRADIENTS[book.category] ?? "linear-gradient(160deg, #555, #222)";
 
   return (
-    <div className="detail">
+    <div className="page">
       {/* Link — хөтчийн back биш, каталог руу шууд. Хэрэглэгч гаднаас шууд
           /books/42 руу орсон байж болох тул back(-1) найдвартай биш. */}
-      <Link to="/" className="detail__back">
+      <Link to="/" className="back-link">
         ← Каталог руу буцах
       </Link>
 
       <div className="detail__grid">
         {/* Зүүн тал: том хавтас (картынхтай ижил градиент + зураг) */}
         <div
-          className="detail__cover"
+          className="book-cover detail__cover"
           style={{
             backgroundImage: `${cover}, url(${CARD_BACKGROUND_URL})`,
             backgroundSize: "cover",
@@ -126,19 +127,23 @@ function BookDetail({ user }) {
             backgroundBlendMode: "multiply",
           }}
         >
-          <span className="card__cover-category">{book.category}</span>
+          <span className="book-cover__category">{book.category}</span>
           {book.cover_url && (
-            <img className="detail__cover-img" src={book.cover_url} alt={book.title} />
+            <img
+              className="book-cover__img detail__cover-img"
+              src={book.cover_url}
+              alt={book.title}
+            />
           )}
           <div>
             <h2 className="detail__cover-title">{book.title}</h2>
-            <p className="card__cover-author">{book.authors.join(", ") || "Unknown"}</p>
+            <p className="book-cover__author">{book.authors.join(", ") || "Unknown"}</p>
           </div>
         </div>
 
         {/* Баруун тал: мэдээлэл */}
         <div className="detail__info">
-          <span className="card__badge">{book.category}</span>
+          <span className="badge-outline">{book.category}</span>
           <h1 className="detail__title">{book.title}</h1>
           <p className="detail__authors">{book.authors.join(", ") || "Unknown author"}</p>
 
@@ -179,7 +184,7 @@ function BookDetail({ user }) {
             )}
           </div>
 
-          {message && <p className="detail__message">{message}</p>}
+          {message && <p className="notice-ok detail__message">{message}</p>}
         </div>
       </div>
     </div>

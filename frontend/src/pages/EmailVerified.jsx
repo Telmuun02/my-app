@@ -1,5 +1,8 @@
 import { Link, useSearchParams } from "react-router-dom";
 import AuthLayout from "../components/AuthLayout";
+// Энэ хуудас .verify* классуудыг ашигладаг тул загварыг нь шууд import хийнэ
+// (VerifyNotice компонентыг өөрийг нь энд ашигладаггүй).
+import "../components/VerifyNotice.css";
 
 // Мэйл дэх холбоосыг дарахад backend энэ хуудас руу redirect хийнэ:
 //   http://localhost:5173/email-verified?status=success | already | error
@@ -34,11 +37,13 @@ function EmailVerified() {
   return (
     <AuthLayout title={info.title} subtitle={info.subtitle}>
       <div className="verify">
-        <p className={info.tone === "ok" ? "verify__ok" : "verify__err"}>{info.text}</p>
+        <p className={info.tone === "ok" ? "notice-ok" : "notice-err"}>{info.text}</p>
 
         {/* replace — түүхэн дэх /email-verified?status=… бичлэгийг СОЛИНО.
-            Ингэснээр back дарахад баталгаажуулалтын хуудас руу буцахгүй. */}
-        <Link to="/signin" replace className="btn-block" style={{ display: "block", textAlign: "center" }}>
+            Ингэснээр back дарахад баталгаажуулалтын хуудас руу буцахгүй.
+            .btn-block нь display:block + width:100% өгдөг тул inline style
+            хэрэггүй болсон. */}
+        <Link to="/signin" replace className="btn-primary btn-block">
           Нэвтрэх
         </Link>
       </div>

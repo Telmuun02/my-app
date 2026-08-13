@@ -1,0 +1,75 @@
+/* BookCard.jsx-ийн загвар.
+   Хавтасны дундын хэсэг нь App.css дахь .book-cover — энд зөвхөн картын
+   өөрийн хэмжээ/зан байдал. */
+
+.card {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Картын дарж болох хэсэг (хавтас + мэдээлэл) — /books/:id рүү заасан Link.
+   Borrow товч энэ линкийн гадна байдаг тул давхцаж дарагдахгүй. */
+.card__link {
+  display: block;
+}
+.card__link:hover .card__cover {
+  transform: translateY(-4px);
+}
+.card__link:hover .card__title {
+  color: var(--primary);
+}
+
+/* .book-cover дээр нэмэх ялгаа: hover хөдөлгөөн + жижиг padding */
+.card__cover {
+  position: relative;
+  transition: transform 0.18s ease;
+  padding: 18px;
+}
+
+/* Зургийн ерөнхий загвар .book-cover__img-д — энд зөвхөн хэмжээ */
+.card__cover-img {
+  width: 90px;
+  height: 130px;
+}
+
+.card__cover-title {
+  font-size: 17px;
+  line-height: 1.25;
+  font-weight: 700;
+}
+
+.card__body {
+  padding: 14px 2px 0;
+}
+
+.card__title {
+  font-size: 16px;
+  line-height: 1.3;
+  font-weight: 700;
+}
+
+.card__author {
+  margin: 4px 0 10px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.card__footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.btn-borrow {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+.btn-borrow:disabled {
+  cursor: not-allowed;
+}

@@ -1,3 +1,5 @@
+import "./Pagination.css";
+
 // Хуудаслалт: ‹ 1 2 3 › . page — идэвхтэй хуудас, totalPages — нийт хуудас.
 // onPage(n) — App/Catalog-ийн page state-ийг өөрчилнө.
 function Pagination({ page, totalPages, onPage }) {

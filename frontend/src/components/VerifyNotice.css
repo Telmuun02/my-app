@@ -1,0 +1,26 @@
+/* И-мэйл баталгаажуулалтын текстүүд.
+   VerifyNotice.jsx болон pages/EmailVerified.jsx хоёулаа ашигладаг тул
+   хоёул энэ файлыг import хийдэг.
+
+   Амжилт/алдааны хайрцаг нь дундын .notice-ok / .notice-err (App.css) —
+   өмнө нь .verify__ok / .verify__err гэж давхардаж бичигдсэн байсан. */
+
+.verify {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.verify__lead {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.verify__hint {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
