@@ -1,10 +1,12 @@
 import { useState } from "react";
-import AuthLayout from "./AuthLayout";
-import VerifyNotice from "./VerifyNotice";
+import { Link } from "react-router-dom";
+import AuthLayout from "../components/AuthLayout";
+import VerifyNotice from "../components/VerifyNotice";
 import client from "../api/client";
 
-// Нэвтрэх хуудас. handleSubmit нь backend-ийн /login endpoint-ыг дуудна.
-function SignIn({ onNavigate, onAuth }) {
+// Нэвтрэх хуудас (/signin). handleSubmit нь backend-ийн /login endpoint-ыг дуудна.
+// Амжилттай бол onAuth(data) — App нь token хадгалж, "/" руу шилжүүлнэ.
+function SignIn({ onAuth }) {
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -63,9 +65,9 @@ function SignIn({ onNavigate, onAuth }) {
       footer={
         <>
           Don&apos;t have an account?{" "}
-          <button type="button" className="auth__link" onClick={() => onNavigate("register")}>
+          <Link to="/register" className="auth__link">
             Register
-          </button>
+          </Link>
         </>
       }
     >

@@ -1,18 +1,29 @@
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { BookIcon, SearchIcon } from "./icons";
 
 // Дээд header: лого, дунд хайлтын талбар, баруун талд Sign in / Register.
 // query, onQueryChange — хайлт (controlled input, App удирдана).
-// onNavigate("catalog" | "signin" | "register") — хуудас солино.
+// Хуудас солих нь <Link> буюу URL-аар явна (өмнөх onNavigate prop хэрэггүй болсон).
 // user — нэвтэрсэн хэрэглэгч (эсвэл null). onLogout — гарах.
-function Header({ query, onQueryChange, onNavigate, user, onLogout }) {
+function Header({ query, onQueryChange, user, onLogout }) {
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+
+  // Хайлт зөвхөн каталог дээр утгатай. Өөр хуудсан дээр бичиж эхэлбэл
+  // каталог руу буцаана — эс бөгөөс бичсэн зүйл нь хаана ч нөлөөлөхгүй.
+  const handleSearch = (e) => {
+    onQueryChange(e.target.value);
+    if (pathname !== "/") navigate("/");
+  };
+
   return (
     <header className="header">
-      <button type="button" className="header__brand" onClick={() => onNavigate("catalog")}>
+      <Link to="/" className="header__brand">
         <span className="header__logo" aria-hidden="true">
           <BookIcon />
         </span>
         <span className="header__name">Folio</span>
-      </button>
+      </Link>
 
       <div className="header__search">
         <SearchIcon />
@@ -20,7 +31,7 @@ function Header({ query, onQueryChange, onNavigate, user, onLogout }) {
           type="search"
           placeholder="Search books, authors…"
           value={query}
-          onChange={(e) => onQueryChange(e.target.value)}
+          onChange={handleSearch}
         />
       </div>
 
@@ -38,12 +49,12 @@ function Header({ query, onQueryChange, onNavigate, user, onLogout }) {
         ) : (
           // Нэвтрээгүй үед: Sign in / Register
           <>
-            <button type="button" className="btn-text" onClick={() => onNavigate("signin")}>
+            <Link to="/signin" className="btn-text">
               Sign in
-            </button>
-            <button type="button" className="btn-primary" onClick={() => onNavigate("register")}>
+            </Link>
+            <Link to="/register" className="btn-primary">
               Register
-            </button>
+            </Link>
           </>
         )}
       </div>

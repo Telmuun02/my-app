@@ -42,6 +42,14 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        // Passport-ын guard. Нэр нь заавал 'api' байх ёстой — Passport дотроос
+        // config('auth.guards.api.provider') гэж шууд уншдаг газар бий.
+        // provider нь oauth_clients.provider-тэй таарч байх ёстой ('users').
+        'api' => [
+            'driver' => 'passport',
+            'provider' => 'users',
+        ],
     ],
 
     /*

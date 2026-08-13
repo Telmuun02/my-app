@@ -77,7 +77,10 @@
 }
 
 /* ===================== Товчнууд ===================== */
+/* Эдгээр нь <button> ба <a> (Link) хоёуланд ашиглагдана — тиймээс
+   inline-block + center нь линк хэлбэрээр ч товч шиг харагдуулна. */
 .btn-text {
+  display: inline-block;
   font-size: 15px;
   color: var(--text);
   padding: 8px 4px;
@@ -87,15 +90,24 @@
 }
 
 .btn-primary {
+  display: inline-block;
   padding: 10px 22px;
   border-radius: 999px;
   background: var(--primary);
   color: #fff;
   font-size: 15px;
   font-weight: 600;
+  text-align: center;
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 .btn-primary:hover {
   background: var(--primary-hover);
+}
+.btn-primary:disabled:hover {
+  background: var(--primary);
 }
 
 /* ===================== Sidebar ===================== */
@@ -200,8 +212,21 @@
   flex-direction: column;
 }
 
+/* Картын дарж болох хэсэг (хавтас + мэдээлэл) — /books/:id рүү заасан Link.
+   Borrow товч энэ линкийн гадна байдаг тул давхцаж дарагдахгүй. */
+.card__link {
+  display: block;
+}
+.card__link:hover .card__cover {
+  transform: translateY(-4px);
+}
+.card__link:hover .card__title {
+  color: var(--primary);
+}
+
 .card__cover {
   position: relative;
+  transition: transform 0.18s ease;
   aspect-ratio: 3 / 4;
   border-radius: var(--radius);
   padding: 18px;
@@ -331,6 +356,112 @@
 .page-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+/* ============ Номын дэлгэрэнгүй хуудас (/books/:id) ============ */
+.detail {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+
+.detail__back {
+  display: inline-block;
+  margin-bottom: 24px;
+  font-size: 15px;
+  color: var(--text-muted);
+}
+.detail__back:hover {
+  color: var(--primary);
+}
+
+/* Зүүн талд тогтмол өргөнтэй хавтас, баруун талд уян мэдээлэл */
+.detail__grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+.detail__cover {
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius);
+  padding: 22px;
+  color: #fff;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.detail__cover-img {
+  align-self: center;
+  width: 120px;
+  height: 174px;
+  object-fit: cover;
+  border-radius: 4px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+.detail__cover-title {
+  font-size: 20px;
+  line-height: 1.25;
+}
+
+.detail__title {
+  margin: 12px 0 0;
+  font-size: 34px;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.detail__authors {
+  margin: 8px 0 0;
+  font-size: 17px;
+  color: var(--text-muted);
+}
+
+/* Мета мэдээлэл — <dl> ашигласан нь "нэр → утга" хосыг семантик болгож байна */
+.detail__meta {
+  margin: 28px 0 0;
+  padding: 4px 0;
+  border-top: 1px solid var(--border);
+}
+
+.detail__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.detail__row dt {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.detail__row dd {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.detail__actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.detail__message {
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background: var(--avail-bg);
+  color: var(--avail-text);
+  font-size: 14px;
 }
 
 /* ===================== Auth (Sign in / Register) ===================== */
@@ -517,5 +648,13 @@
   }
   .header__search {
     display: none;
+  }
+  /* Дэлгэрэнгүй хуудас: хоёр багана → нэг багана */
+  .detail__grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .detail__cover {
+    max-width: 280px;
   }
 }

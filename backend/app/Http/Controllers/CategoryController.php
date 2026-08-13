@@ -3,17 +3,31 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
+/**
+ * Номын ангиллын delete, update, create, select үйлдлүүд.
+ *
+ * Жагсаах, харах нь нээлттэй; үүсгэх, засах, устгах нь нэвтэрсэн бөгөөд
+ * и-мэйлээ баталгаажуулсан хэрэглэгчид зориулагдсан (routes/api.php-г үзнэ үү).
+ */
 class CategoryController extends Controller
 {
-    public function index()
+    /**
+     * Бүх ангилал.
+     */
+    public function index(): JsonResponse
     {
         return response()->json(Category::all());
     }
 
-    // create
-    public function store(Request $request)
+    /**
+     * Шинэ ангилал үүсгэх.  POST /api/categories
+     *
+     */
+    public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:categories',
@@ -24,15 +38,22 @@ class CategoryController extends Controller
         return response()->json($category, 201);
     }
 
-    // select
-    public function show(Category $category)
+    /**
+     * Нэг ангилал, түүнд харьяалагдах номуудын хамт.  GET /api/categories/{category}
+     */
+    public function show(Category $category): JsonResponse
     {
         return response()->json($category->load('books'));
     }
 
-    // update
-    public function update(Request $request, Category $category)
+    /**
+     * Ангилал засварлах.  PUT /api/categories/{category}
+     *
+     */
+    public function update(Request $request, Category $category): JsonResponse
     {
+        // unique дүрэмд одоогийн id-г үл хамаарах болгож өгсөн — эс бөгөөс
+        // ангилал өөрийнхөө нэрээр хадгалагдахад "давхардсан" гэж алдаа өгнө.
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
         ]);
@@ -42,8 +63,10 @@ class CategoryController extends Controller
         return response()->json($category);
     }
 
-    // delete
-    public function destroy(Category $category)
+    /**
+     * Ангилал устгах.  DELETE /api/categories/{category}
+     */
+    public function destroy(Category $category): JsonResponse
     {
         $category->delete();
 

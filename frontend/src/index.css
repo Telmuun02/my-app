@@ -55,3 +55,10 @@ button {
 input {
   font-family: inherit;
 }
+
+/* react-router-ийн <Link> нь <a> болж render хийгддэг тул хөтчийн үндсэн
+   цэнхэр өнгө/доогуур зураасыг тэглэж, эцэг элементийн загварыг өвлүүлнэ. */
+a {
+  color: inherit;
+  text-decoration: none;
+}

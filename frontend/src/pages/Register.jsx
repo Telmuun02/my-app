@@ -1,6 +1,7 @@
 import { useState } from "react";
-import AuthLayout from "./AuthLayout";
-import VerifyNotice from "./VerifyNotice";
+import { Link } from "react-router-dom";
+import AuthLayout from "../components/AuthLayout";
+import VerifyNotice from "../components/VerifyNotice";
 import client from "../api/client";
 
 // Бүртгүүлэх хуудас. handleSubmit нь backend-ийн /register endpoint-ыг дуудна.
@@ -9,7 +10,7 @@ import client from "../api/client";
 // ХАТУУ ГОРИМ: backend бүртгэлийн хариунд token БУЦААХГҮЙ. Тиймээс энд шууд
 // нэвтрүүлэхгүй — "мэйлээ шалгана уу" дэлгэц харуулж, хэрэглэгч и-мэйлээ
 // баталгаажуулсны дараа /signin-ээр нэвтэрнэ.
-function Register({ onNavigate }) {
+function Register() {
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -49,9 +50,9 @@ function Register({ onNavigate }) {
         footer={
           <>
             Баталгаажуулсан уу?{" "}
-            <button type="button" className="auth__link" onClick={() => onNavigate("signin")}>
+            <Link to="/signin" className="auth__link">
               Sign in
-            </button>
+            </Link>
           </>
         }
       >
@@ -67,9 +68,9 @@ function Register({ onNavigate }) {
       footer={
         <>
           Already have an account?{" "}
-          <button type="button" className="auth__link" onClick={() => onNavigate("signin")}>
+          <Link to="/signin" className="auth__link">
             Sign in
-          </button>
+          </Link>
         </>
       }
     >

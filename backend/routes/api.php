@@ -43,7 +43,7 @@ Route::get('/books/{book}', [BookController::class, 'show']);
 | Хатуу горимд token нь зөвхөн баталгаажсан хэрэглэгчид олгогддог тул
 | энд байгаа хэн боловч аль хэдийн баталгаажсан байна.
 */
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth:api')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
 });
@@ -59,7 +59,7 @@ Route::get('/email/verify', fn () => response()->json([
 | Хамгаалагдсан route-ууд (token + и-мэйл баталгаажсан байх шаардана)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth:sanctum', 'verified'])->group(function () {
+Route::middleware(['auth:api', 'verified'])->group(function () {
     // Ангилал / Зохиолч / Ном — үүсгэх, засах, устгах
     Route::apiResource('categories', CategoryController::class)->except(['index', 'show']);
     Route::apiResource('authors', AuthorController::class)->except(['index', 'show']);

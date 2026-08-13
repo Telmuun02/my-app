@@ -13,14 +13,11 @@ use Illuminate\Support\Facades\Log;
 use Throwable;
 use Exception;
 
-// ShouldBeUnique
-// event
-// back-off
-// retry
-
-// redis hiih. 
-
-
+/** 
+ * тухайн ажлыг background доо ажлуулахын тулд хэрэглэдэг job 
+ * 
+ * үүн дээр queue ашиглаж байна. 
+ */
 class CreateLoanJob implements ShouldQueue, ShouldBeUnique
 {
     use Queueable;

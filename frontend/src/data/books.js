@@ -14,6 +14,12 @@ export const CATEGORIES = [
   "Science",
 ];
 
+// Картын хавтасны ард харагдах зураг (Cloudinary дээр folio/card-background).
+// URL доторх хувиргалтууд: ar_3:4 нь .card__cover-ийн aspect-ratio-той таарна,
+// f_auto/q_auto нь формат, чанарыг хөтчид тохируулж хэмжээг багасгана.
+export const CARD_BACKGROUND_URL =
+  "https://res.cloudinary.com/dv0hxjoqv/image/upload/w_600,ar_3:4,c_fill,f_auto,q_auto/folio/card-background";
+
 export const COVER_GRADIENTS = {
   Fiction: "linear-gradient(160deg, #7a4325, #3d2417)",
   Mystery: "linear-gradient(160deg, #3a4a63, #1f2a3c)",

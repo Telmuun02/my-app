@@ -1,4 +1,5 @@
-import AuthLayout from "./AuthLayout";
+import { Link, useSearchParams } from "react-router-dom";
+import AuthLayout from "../components/AuthLayout";
 
 // Мэйл дэх холбоосыг дарахад backend энэ хуудас руу redirect хийнэ:
 //   http://localhost:5173/email-verified?status=success | already | error
@@ -25,24 +26,21 @@ const MESSAGES = {
   },
 };
 
-function EmailVerified({ onNavigate }) {
-  const status = new URLSearchParams(window.location.search).get("status");
-  const info = MESSAGES[status] ?? MESSAGES.error;
-
-  // Хаягийн мөрийг цэвэрлэнэ — эс бөгөөс refresh дарахад дахин энэ хуудас гарна.
-  const goSignIn = () => {
-    window.history.replaceState({}, "", "/");
-    onNavigate("signin");
-  };
+function EmailVerified() {
+  // ?status=success | already | error — router-ийн hook-оор уншина.
+  const [searchParams] = useSearchParams();
+  const info = MESSAGES[searchParams.get("status")] ?? MESSAGES.error;
 
   return (
     <AuthLayout title={info.title} subtitle={info.subtitle}>
       <div className="verify">
         <p className={info.tone === "ok" ? "verify__ok" : "verify__err"}>{info.text}</p>
 
-        <button type="button" className="btn-block" onClick={goSignIn}>
+        {/* replace — түүхэн дэх /email-verified?status=… бичлэгийг СОЛИНО.
+            Ингэснээр back дарахад баталгаажуулалтын хуудас руу буцахгүй. */}
+        <Link to="/signin" replace className="btn-block" style={{ display: "block", textAlign: "center" }}>
           Нэвтрэх
-        </button>
+        </Link>
       </div>
     </AuthLayout>
   );

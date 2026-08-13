@@ -1,43 +1,71 @@
-import { COVER_GRADIENTS } from "../data/books";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { CARD_BACKGROUND_URL, COVER_GRADIENTS } from "../data/books";
 
 // Нэг номын карт: өнгөт хавтас + доор нь мэдээлэл, availability, borrow товч.
 // user — нэвтэрсэн эсэх (зээлэх товч идэвхжинэ). onBorrow(id) — зээлэх дуудалт.
+//
+// Хавтас/мэдээллийн хэсгийг дарахад /books/:id дэлгэрэнгүй хуудас руу орно.
+// Footer (borrow товч) нь ЗОРИУДААР Link-ийн ГАДНА байна — товчийг линк дотор
+// хийвэл дарах бүрд бас хуудас солигдох байсан.
 function BookCard({ book, user, onBorrow }) {
   const isAvailable = book.available > 0;
   const cover = COVER_GRADIENTS[book.category] ?? "linear-gradient(160deg, #555, #222)";
 
+  // Зураг ачаалагдаагүй бол <img>-ийг нуугаад доорх градиентыг ил гаргана.
+  const [coverFailed, setCoverFailed] = useState(false);
+
   return (
     <article className="card">
-      {/* Ном хавтас */}
-      <div className="card__cover" style={{ background: cover }}>
-        <span className="card__cover-category">{book.category}</span>
-
-        {/* Номын зураг (одоохондоо бүх номд ижил placeholder) */}
-        <img
-          className="card__cover-img"
-          src="https://covers.openlibrary.org/b/isbn/9780451524935-L.jpg"
-          alt={book.title}
+      <Link to={`/books/${book.id}`} className="card__link">
+        {/* Ном хавтас.
+            Хоёр давхар background: дээр нь ангиллын градиент, дор нь Cloudinary
+            дээрх зураг. multiply нь градиентын өнгөөр зургийг будаж холино —
+            ингэснээр ангилал бүрийн өнгө хадгалагдаж, зураг ч мөн харагдана. */}
+        <div
+          className="card__cover"
           style={{
-            width: "90px",
-            height: "130px",
-            objectFit: "cover",
-            borderRadius: "4px",
-            boxShadow: "0 6px 16px rgba(0,0,0,0.35)",
+            backgroundImage: `${cover}, url(${CARD_BACKGROUND_URL})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundBlendMode: "multiply",
           }}
-        />
+        >
+          <span className="card__cover-category">{book.category}</span>
 
-        <div className="card__cover-text">
-          <h3 className="card__cover-title">{book.title}</h3>
-          <p className="card__cover-author">{book.author}</p>
+          {/* Номын зураг — URL нь backend-ээс (Cloudinary) ирнэ.
+              Одоохондоо бүх ном ижил зурагтай; хэмжээ, формат Cloudinary тал дээр
+              тохируулагдсан тул энд зөвхөн харуулна. */}
+          {!coverFailed && book.cover_url && (
+            <img
+              className="card__cover-img"
+              src={book.cover_url}
+              alt={book.title}
+              loading="lazy"
+              onError={() => setCoverFailed(true)}
+              style={{
+                width: "90px",
+                height: "130px",
+                objectFit: "cover",
+                borderRadius: "4px",
+                boxShadow: "0 6px 16px rgba(0,0,0,0.35)",
+              }}
+            />
+          )}
+
+          <div className="card__cover-text">
+            <h3 className="card__cover-title">{book.title}</h3>
+            <p className="card__cover-author">{book.author}</p>
+          </div>
         </div>
-      </div>
 
-      {/* Хавтасны доорх мэдээлэл */}
-      <div className="card__body">
-        <h3 className="card__title">{book.title}</h3>
-        <p className="card__author">{book.author}</p>
-        <span className="card__badge">{book.category}</span>
-      </div>
+        {/* Хавтасны доорх мэдээлэл */}
+        <div className="card__body">
+          <h3 className="card__title">{book.title}</h3>
+          <p className="card__author">{book.author}</p>
+          <span className="card__badge">{book.category}</span>
+        </div>
+      </Link>
 
       {/* Footer: боломжтой тоо + borrow товч */}
       <div className="card__footer">

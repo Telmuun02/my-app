@@ -8,7 +8,11 @@ use Illuminate\Auth\Events\Verified; // Laravel iin uuriinh event
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
-// verify route ruu handahad ajillah controller
+    /** 
+     * Mail yvuulah controller. 
+     * 
+     * verify hiih uyd ee duudah controller.
+     */
 class EmailVerificationController extends Controller
 {
     /**

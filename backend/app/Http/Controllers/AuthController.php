@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;  // pattern 
 use Illuminate\Validation\ValidationException;
 
+ /**
+  * Authenti
+  */
 class AuthController extends Controller
 {
     // register function
@@ -142,7 +145,9 @@ class AuthController extends Controller
             }
 
             // token uusgeh
-            $token = $user->createToken('auth_token')->plainTextToken;
+            // Passport-ын createToken() нь PersonalAccessTokenResult буцаадаг —
+            // түүхий JWT нь ->accessToken дотор байна (Sanctum дээр ->plainTextToken байсан).
+            $token = $user->createToken('auth_token')->accessToken;
         } catch (ValidationException $e) {
             // aldaa shideh
             throw $e;
@@ -181,7 +186,7 @@ class AuthController extends Controller
      */
     public function me(Request $request)
     {
-        // auth:sanctum middleware дамжсан бол $request->user() нь тухайн хэрэглэгч.
+        // auth:api middleware дамжсан бол $request->user() нь тухайн хэрэглэгч.
         // ard ni load('company') hiih ni company niih ni medeellig hamtad ni butsaana
         return response()->json($request->user()->load('company'));
     }
@@ -195,7 +200,9 @@ class AuthController extends Controller
         $userId = $request->user()->id;
 
         // token iig ni ustgana
-        $request->user()->currentAccessToken()->delete();
+        // Passport дээр мөрийг устгадаггүй, revoked = true болгон тэмдэглэдэг.
+        // Хүчингүй болсон бичлэгүүдийг дараа нь `php artisan passport:purge`-ээр цэвэрлэнэ.
+        $request->user()->token()->revoke();
 
         // INFO — хэрэглэгч гарсныг тэмдэглэнэ.
         Log::info('Хэрэглэгч гарлаа.', [

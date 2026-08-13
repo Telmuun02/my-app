@@ -5,6 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Author;
 use Illuminate\Http\Request;
 
+/** 
+ * Author Controller. 
+ * 
+ * CRUD hiih controller.
+ */
 class AuthorController extends Controller
 {
     // list butsaah function

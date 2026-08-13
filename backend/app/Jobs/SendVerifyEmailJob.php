@@ -6,6 +6,7 @@ use App\Mail\VerifyEmailMail;
 use App\Models\User;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\Middleware\RateLimited;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Throwable;
@@ -26,7 +27,22 @@ class SendVerifyEmailJob implements ShouldQueue
     
     public function __construct(public User $user)
     {
-        // baiguulagch 
+        // baiguulagch
+    }
+
+    /**
+     * Job-ийн middleware.
+     *
+     * RateLimited нь AppServiceProvider дотор тодорхойлсон 'verification-emails'
+     * хязгаарыг шалгана (минутад 60).
+     *
+     * dontRelease() — хязгаарт хүрсэн үед job-ыг queue руу БУЦААХГҮЙ, шууд
+     * цуцална. Үүнгүй бол Laravel хожим дахин оролдохоор түлхэж, хязгаарын
+     * ард дараалал үүсгэнэ. Бидний зорилго "цуцлах" тул dontRelease() хэрэгтэй.
+     */
+    public function middleware(): array
+    {
+        return [(new RateLimited('verification-emails'))->dontRelease()];
     }
 
     public function handle(): void

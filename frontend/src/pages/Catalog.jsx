@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import Sidebar from "./Sidebar";
-import BookCard from "./BookCard";
-import Pagination from "./Pagination";
-import { SearchIcon } from "./icons";
+import Sidebar from "../components/Sidebar";
+import BookCard from "../components/BookCard";
+import Pagination from "../components/Pagination";
+import { SearchIcon } from "../components/icons";
 import client from "../api/client";
 
 // API-ийн ном → UI-д хэрэгтэй энгийн бүтэц рүү хөрвүүлэх.
@@ -14,6 +14,7 @@ function normalizeBook(book) {
     author: book.authors?.join(", ") || "Unknown",
     category: book.category ?? "Uncategorized",
     available: book.available,
+    cover_url: book.cover_url,
   };
 }
 

@@ -1,9 +1,14 @@
 import { useState } from "react";
+import { Route, Routes, useNavigate } from "react-router-dom";
 import Header from "./components/Header";
-import Catalog from "./components/Catalog";
-import SignIn from "./components/SignIn";
-import Register from "./components/Register";
-import EmailVerified from "./components/EmailVerified";
+// pages/ — route бүрт харгалзах "хуудас". components/ — тэдгээрийн доторх
+// дахин ашиглагддаг жижиг хэсгүүд (Header, BookCard, Sidebar…).
+import Catalog from "./pages/Catalog";
+import BookDetail from "./pages/BookDetail";
+import SignIn from "./pages/SignIn";
+import Register from "./pages/Register";
+import EmailVerified from "./pages/EmailVerified";
+import NotFound from "./pages/NotFound";
 import client, { setToken, clearToken } from "./api/client";
 import "./App.css";
 
@@ -13,26 +18,21 @@ function loadStoredUser() {
   return raw ? JSON.parse(raw) : null;
 }
 
-// Backend баталгаажуулсны дараа /email-verified?status=… руу redirect хийдэг.
-// react-router байхгүй тул эхний ачаалалт дээр URL-ыг шууд шалгана.
-function initialView() {
-  return window.location.pathname === "/email-verified" ? "email-verified" : "catalog";
-}
-
 function App() {
   // Хайлт header ба каталог хоёрт хуваалцагдана.
   const [query, setQuery] = useState("");
-  // Энгийн "router": одоо харагдаж буй хуудас.
-  const [view, setView] = useState(initialView);
   // Нэвтэрсэн хэрэглэгч (эсвэл null).
   const [user, setUser] = useState(loadStoredUser);
 
-  // SignIn / Register амжилттай болоход дуудагдана. data = { user, token }.
+  // Хуудас солих нь одоо URL-аар явна (өмнөх `view` state-ийн оронд).
+  const navigate = useNavigate();
+
+  // SignIn амжилттай болоход дуудагдана. data = { user, token }.
   const handleAuth = ({ user, token }) => {
     setToken(token);
     localStorage.setItem("folio_user", JSON.stringify(user));
     setUser(user);
-    setView("catalog");
+    navigate("/");
   };
 
   // Гарах: backend дээрх token-ыг устгаад, локал төлвийг цэвэрлэнэ.
@@ -45,25 +45,26 @@ function App() {
     clearToken();
     localStorage.removeItem("folio_user");
     setUser(null);
-    setView("catalog");
+    navigate("/");
   };
 
   return (
     <div className="app">
-      <Header
-        query={query}
-        onQueryChange={setQuery}
-        onNavigate={setView}
-        user={user}
-        onLogout={handleLogout}
-      />
+      {/* Header бүх хуудсанд харагдана — Routes-ийн гадна байна. */}
+      <Header query={query} onQueryChange={setQuery} user={user} onLogout={handleLogout} />
 
-      {view === "catalog" && <Catalog query={query} onQueryChange={setQuery} user={user} />}
-      {view === "signin" && <SignIn onNavigate={setView} onAuth={handleAuth} />}
-      {/* Register нь token авахаа больсон тул onAuth хэрэггүй — өөрөө
-          "мэйлээ шалгана уу" дэлгэц рүү шилжинэ. */}
-      {view === "register" && <Register onNavigate={setView} />}
-      {view === "email-verified" && <EmailVerified onNavigate={setView} />}
+      {/* URL → компонент харгалзуулалт. Дээрээс доош тааруулахгүй, react-router
+          хамгийн тохирох (specific) route-ыг өөрөө сонгоно. */}
+      <Routes>
+        <Route path="/" element={<Catalog query={query} onQueryChange={setQuery} user={user} />} />
+        {/* :id — динамик хэсэг. BookDetail дотор useParams()-аар уншина. */}
+        <Route path="/books/:id" element={<BookDetail user={user} />} />
+        <Route path="/signin" element={<SignIn onAuth={handleAuth} />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/email-verified" element={<EmailVerified />} />
+        {/* Дээрхийн аль нь ч таарахгүй бол */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
     </div>
   );
 }

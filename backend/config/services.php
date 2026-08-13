@@ -35,4 +35,21 @@ return [
         ],
     ],
 
+    /*
+     | Cloudinary — номын нүүр зургийн хадгалалт.
+     |
+     | cloud_name нь зургийн хүргэлтийн URL бүрд ил харагддаг тул нууц биш.
+     | api_key / api_secret нь зөвхөн БАЙРШУУЛАХ үед хэрэгтэй — зураг харуулахад
+     | огт шаардлагагүй. Тиймээс production дээр secret байхгүй байсан ч
+     | каталог хэвийн ажиллана.
+     */
+    'cloudinary' => [
+        'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+        'api_key'    => env('CLOUDINARY_API_KEY'),
+        'api_secret' => env('CLOUDINARY_API_SECRET'),
+
+        // Бүх номд харагдах ганц нүүр зургийн Cloudinary дахь public_id.
+        'default_cover' => env('CLOUDINARY_DEFAULT_COVER', 'folio/book-cover-default'),
+    ],
+
 ];
