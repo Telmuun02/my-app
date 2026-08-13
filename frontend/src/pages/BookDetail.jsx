@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { CARD_BACKGROUND_URL, COVER_GRADIENTS } from "../data/books";
 import client from "../api/client";
 import "./BookDetail.css";
+import BasicRating from "../components/BasicRating";
 
 // Нэг номын дэлгэрэнгүй хуудас — URL: /books/:id
 //
@@ -35,11 +36,18 @@ function BookDetail({ user }) {
   const [borrowing, setBorrowing] = useState(false);
   const [message, setMessage] = useState("");
 
+  // Үнэлгээ. АНХААР: backend-д одоогоор rating endpoint байхгүй тул энэ нь
+  // зөвхөн локал төлөв — хуудас сэргээхэд алга болно.
+  const [rating, setRating] = useState(null);
+
   // id өөрчлөгдөх бүрд (өөр ном руу шилжихэд) дахин татна.
   useEffect(() => {
     let active = true;
     setLoading(true);
     setMessage("");
+    // Өөр ном руу шилжихэд компонент дахин mount хийгддэггүй (зөвхөн :id
+    // солигддог) тул өмнөх номын үнэлгээ үлдэхээс сэргийлж цэвэрлэнэ.
+    setRating(null);
 
     client
       .get(`/books/${id}`)
@@ -146,6 +154,8 @@ function BookDetail({ user }) {
           <span className="badge-outline">{book.category}</span>
           <h1 className="detail__title">{book.title}</h1>
           <p className="detail__authors">{book.authors.join(", ") || "Unknown author"}</p>
+
+          <BasicRating label="Үнэлгээ" value={rating} onChange={setRating} />
 
           <dl className="detail__meta">
             <div className="detail__row">

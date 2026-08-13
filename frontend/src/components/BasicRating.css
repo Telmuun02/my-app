@@ -1,0 +1,16 @@
+/* BasicRating.jsx — MUI-ийн Rating-ийн эргэн тойрны байрлал/текст.
+   Одны өнгийг MUI өөрөө өгнө (амбер) — энэ нь ерөнхий дизайнтай зөрчилддөггүй
+   тул sx-ээр дарж бичих шаардлагагүй. */
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.rating__label,
+.rating__value {
+  font-size: 14px;
+  color: var(--text-muted);
+}
