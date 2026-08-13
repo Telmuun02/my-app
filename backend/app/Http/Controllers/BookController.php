@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\BookDetailResource;
 use App\Http\Resources\BookResource;
 use App\Models\Book;
 use Illuminate\Http\JsonResponse;
@@ -107,10 +108,15 @@ class BookController extends Controller
 
     /**
      * Нэг номын дэлгэрэнгүй.  GET /api/books/{book}
+     *
+     * Resource ашигласан нь чухал: index() ч мөн resource буцаадаг тул нэг
+     * entity хоёр өөр хэлбэртэй байхаас сэргийлнэ. Мөн cover_url энд ирнэ.
      */
     public function show(Book $book): JsonResponse
     {
-        return response()->json($book->load(['category', 'authors']));
+        $book->load(['category', 'authors']);
+
+        return response()->json(new BookDetailResource($book));
     }
 
     /**

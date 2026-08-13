@@ -1,25 +1,25 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { CARD_BACKGROUND_URL, COVER_GRADIENTS } from "../data/books";
+import { COVER_GRADIENTS } from "../data/books";
 import client from "../api/client";
 import "./BookDetail.css";
 import BasicRating from "../components/BasicRating";
 
 // Нэг номын дэлгэрэнгүй хуудас — URL: /books/:id
 //
-// Анхаар: backend-ийн BookController::show() нь BookResource БИШ, харин
-// загварыг шууд буцаадаг (available_copies, total_copies, isbn, category нь
-// объект...). Тиймээс жагсаалтын хэлбэрээс өөр — энд нэг дор хөрвүүлж авна.
+// show() нь одоо BookDetailResource буцаадаг болсон тул хэлбэр нь жагсаалттай
+// ижил нэршилтэй (available, category нь мөр, authors нь мөрийн массив,
+// cover_url бий). ?? -ууд нь хуучин түүхий загварын хэлбэрийг ч дэмжсэн хэвээр —
+// кэш/хуучин хариу ирвэл ч эвдрэхгүй.
 function normalizeBook(book) {
   return {
     id: book.id,
     title: book.title,
     isbn: book.isbn,
-    category: book.category?.name ?? "Uncategorized",
-    authors: (book.authors ?? []).map((a) => a.name),
-    // ?? — index (BookResource) ба show (загвар) хоёрын аль ч хэлбэрийг дэмжинэ
-    available: book.available_copies ?? book.available ?? 0,
-    total: book.total_copies,
+    category: book.category?.name ?? book.category ?? "Uncategorized",
+    authors: (book.authors ?? []).map((a) => a?.name ?? a),
+    available: book.available ?? book.available_copies ?? 0,
+    total: book.total ?? book.total_copies,
     cover_url: book.cover_url ?? null,
   };
 }
@@ -40,6 +40,9 @@ function BookDetail({ user }) {
   // зөвхөн локал төлөв — хуудас сэргээхэд алга болно.
   const [rating, setRating] = useState(null);
 
+  // Зураг ачаалагдаагүй бол градиент + текст рүү шилжинэ.
+  const [coverFailed, setCoverFailed] = useState(false);
+
   // id өөрчлөгдөх бүрд (өөр ном руу шилжихэд) дахин татна.
   useEffect(() => {
     let active = true;
@@ -48,6 +51,7 @@ function BookDetail({ user }) {
     // Өөр ном руу шилжихэд компонент дахин mount хийгддэггүй (зөвхөн :id
     // солигддог) тул өмнөх номын үнэлгээ үлдэхээс сэргийлж цэвэрлэнэ.
     setRating(null);
+    setCoverFailed(false);
 
     client
       .get(`/books/${id}`)
@@ -125,28 +129,26 @@ function BookDetail({ user }) {
       </Link>
 
       <div className="detail__grid">
-        {/* Зүүн тал: том хавтас (картынхтай ижил градиент + зураг) */}
-        <div
-          className="book-cover detail__cover"
-          style={{
-            backgroundImage: `${cover}, url(${CARD_BACKGROUND_URL})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundBlendMode: "multiply",
-          }}
-        >
-          <span className="book-cover__category">{book.category}</span>
-          {book.cover_url && (
+        {/* Зүүн тал: номын жинхэнэ хавтасны зураг.
+            Градиент нь зөвхөн ФОН — зураг ирээгүй/ачаалагдаагүй үед л харагдана. */}
+        <div className="book-cover detail__cover" style={{ backgroundImage: cover }}>
+          {book.cover_url && !coverFailed ? (
             <img
-              className="book-cover__img detail__cover-img"
+              className="detail__cover-img"
               src={book.cover_url}
-              alt={book.title}
+              alt={`${book.title} — хавтас`}
+              onError={() => setCoverFailed(true)}
             />
+          ) : (
+            // Зураггүй үеийн нөөц хувилбар: ангилал + гарчиг градиент дээр
+            <div className="detail__cover-fallback">
+              <span className="book-cover__category">{book.category}</span>
+              <div>
+                <h2 className="detail__cover-title">{book.title}</h2>
+                <p className="book-cover__author">{book.authors.join(", ") || "Unknown"}</p>
+              </div>
+            </div>
           )}
-          <div>
-            <h2 className="detail__cover-title">{book.title}</h2>
-            <p className="book-cover__author">{book.authors.join(", ") || "Unknown"}</p>
-          </div>
         </div>
 
         {/* Баруун тал: мэдээлэл */}

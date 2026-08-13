@@ -11,16 +11,29 @@
   align-items: start;
 }
 
-/* .book-cover дээр нэмэх ялгаа: илүү том padding */
+/* .book-cover дээр нэмэх ялгаа: зураг ирмэг хүртэл дүүрэх тул padding алга.
+   backgroundImage (градиент) нь зөвхөн зурагны АРД — нөөц хувилбар. */
 .detail__cover {
-  padding: 22px;
+  padding: 0;
+  background-size: cover;
+  background-position: center;
 }
 
-/* Зургийн ерөнхий загвар .book-cover__img-д — энд зөвхөн хэмжээ/байрлал */
+/* Зураг хавтсыг бүтнээр дүүргэнэ. object-fit: cover нь харьцааг хадгалж,
+   илүү хэсгийг таслана — сунгаж гажуудуулахгүй. */
 .detail__cover-img {
-  align-self: center;
-  width: 120px;
-  height: 174px;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Зурагггүй үед: градиент дээр ангилал + гарчиг */
+.detail__cover-fallback {
+  height: 100%;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .detail__cover-title {
