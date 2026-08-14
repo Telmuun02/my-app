@@ -98,7 +98,7 @@ function BookDetail({ user }) {
     }
   };
 
-  if (loading) {
+  if (loading) {  
     return (
       <div className="page">
         <p className="empty-state">Loading…</p>

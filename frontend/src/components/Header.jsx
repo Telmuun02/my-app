@@ -7,9 +7,8 @@ import "./Header.css";
 // query, onQueryChange — хайлт (controlled input, App удирдана).
 // Хуудас солих нь <Link> буюу URL-аар явна (өмнөх onNavigate prop хэрэггүй болсон).
 // user — нэвтэрсэн хэрэглэгч (эсвэл null). onLogout — гарах.
-// cartCount — сагсан дахь номын тоо; 0 үед badge харагдахгүй.
-// onCartClick — сагс дарахад (одоохондоо заавал биш).
-function Header({ query, onQueryChange, user, onLogout, cartCount = 0, onCartClick }) {
+// cartCount — сагсан дахь номын тоо; 0 үед тоо харагдахгүй.
+function Header({ query, onQueryChange, user, onLogout, cartCount = 0 }) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
@@ -42,17 +41,15 @@ function Header({ query, onQueryChange, user, onLogout, cartCount = 0, onCartCli
       <div className="header__auth">
         {/* Сагс. Тоог MUI-ийн Badge-ээр биш, өөрсдийн CSS-ээр наана —
             хэрэгтэй нь ердөө "0 үед нуух" + булан дээр байрлуулах хоёр. */}
-        <button
-          type="button"
-          className="header__cart"
-          aria-label={`Сагс (${cartCount})`}
-          onClick={onCartClick}
-        >
+        {/* Сагс. onClick + navigate биш <Link> — хэрэглэгч баруун товчоор
+            "шинэ цонхонд нээх", эсвэл Ctrl+дарж шинэ табанд нээх боломжтой
+            болно. Товч тийм боломж өгдөггүй. */}
+        <Link to="/cart" className="header__cart" aria-label={`Сагс (${cartCount})`}>
           <AddShoppingCartIcon fontSize="small" />
           {cartCount > 0 && (
             <span className="header__cart-count">{cartCount > 99 ? "99+" : cartCount}</span>
           )}
-        </button>
+        </Link>
 
         {user ? (
           // Нэвтэрсэн үед: нэр + Sign out

@@ -5,6 +5,7 @@ import Header from "./components/Header";
 // дахин ашиглагддаг жижиг хэсгүүд (Header, BookCard, Sidebar…).
 import Catalog from "./pages/Catalog";
 import BookDetail from "./pages/BookDetail";
+import Cart from "./pages/Cart";
 import SignIn from "./pages/SignIn";
 import Register from "./pages/Register";
 import EmailVerified from "./pages/EmailVerified";
@@ -59,6 +60,7 @@ function App() {
         <Route path="/" element={<Catalog query={query} onQueryChange={setQuery} user={user} />} />
         {/* :id — динамик хэсэг. BookDetail дотор useParams()-аар уншина. */}
         <Route path="/books/:id" element={<BookDetail user={user} />} />
+        <Route path="/cart" element={<Cart user={user} />} />
         <Route path="/signin" element={<SignIn onAuth={handleAuth} />} />
         <Route path="/register" element={<Register />} />
         <Route path="/email-verified" element={<EmailVerified />} />
