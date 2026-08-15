@@ -1,0 +1,38 @@
+# Build context-оос хасах зүйлс.
+#
+# Эдгээрийг хасахгүй бол `docker build` нь хэдэн зуун MB-ыг Docker daemon руу
+# дамжуулж, build удаашрах ба нууц утгууд (.env) image дотор орох эрсдэлтэй.
+
+# Композерийн хамаарлууд — image дотор composer install-аар дахин суулгагдана.
+# Хост дээрх нь өөр PHP хувилбараар суусан байж болзошгүй тул хуулах нь аюултай.
+/vendor
+
+# Нууц утгууд. Контейнер нь орчны хувьсагчаар (compose environment / env_file)
+# тохиргоогоо авах ёстой — image дотор шатаагдсан байх ёсгүй.
+.env
+.env.*
+!.env.example
+
+# Passport-ийн түлхүүрүүд — контейнер дотор шинээр үүсгэнэ (initial.sh)
+storage/oauth-*.key
+
+# Ажиллах үеийн хог
+/storage/logs/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/bootstrap/cache/*
+
+# Git болон редакторын файлууд
+.git
+.gitignore
+.vscode
+.idea
+
+# Тестийн үр дүн
+/.phpunit.cache
+.phpunit.result.cache
+
+# Docker өөрөө
+Dockerfile
+.dockerignore

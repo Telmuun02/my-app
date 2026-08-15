@@ -1,0 +1,24 @@
+# Build context-оос хасах зүйлс.
+
+# Хостын node_modules — image дотор npm ci-аар дахин суулгагдана.
+# Хостынх нь Windows-д зориулсан бинарууд агуулж болзошгүй тул Linux
+# контейнерт хуулах нь эвдрэлд хүргэнэ.
+/node_modules
+
+# Build-ийн үр дүн — image дотор шинээр үүсгэнэ
+/dist
+
+# Орчны нууц утгууд
+.env
+.env.*
+!.env.example
+
+# Git болон редакторын файлууд
+.git
+.gitignore
+.vscode
+.idea
+
+# Docker өөрөө
+Dockerfile
+.dockerignore
