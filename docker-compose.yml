@@ -76,7 +76,22 @@ services:
       SETUP: "1"
     # entrypoint нь тохиргоог хийгээд, дараа нь доорх command-ыг exec хийнэ.
     entrypoint: ["bash", "initial.sh"]
-    command: ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+    # `php artisan serve` БИШ гэдгийг анхаар.
+    #
+    # ServeCommand нь HTTP хүсэлт боловсруулдаг хүүхэд процесс руу зөвхөн
+    # $passthroughVariables жагсаалтад буй орчны хувьсагчдыг дамжуулдаг
+    # (APP_ENV, PATH, XDEBUG_* г.м.). DB_HOST тэнд БАЙХГҮЙ тул Docker-ийн
+    # өгсөн утга хаягдаж, апп нь .env доторх хоосон DB_HOST-ыг уншдаг байсан.
+    # Үр дүн: artisan migrate ажиллана, харин /api/books нь "Host: " хоосон
+    # гэж унана.
+    #
+    # PHP-ийн суурилуулсан серверийг Laravel-ийн router script-тэй шууд
+    # ажиллуулбал орчин бүтнээрээ өвлөгдөнө. Router нь getcwd()-г public
+    # хавтас гэж үздэг тул эхлээд тийш шилжинэ.
+    command:
+      - sh
+      - -c
+      - cd public && exec php -S 0.0.0.0:8000 /app/vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php
     ports:
       - "8000:8000"
     volumes:
