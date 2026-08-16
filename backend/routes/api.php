@@ -68,15 +68,28 @@ Route::get('/email/verify', fn () => response()->json([
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth:api', 'verified'])->group(function () {
-    // Ангилал / Зохиолч / Ном — үүсгэх, засах, устгах
-    Route::apiResource('categories', CategoryController::class)->except(['index', 'show']);
-    Route::apiResource('authors', AuthorController::class)->except(['index', 'show']);
-    Route::apiResource('books', BookController::class)->except(['index', 'show']);
+    // --- Зөвхөн админ (токенд тухайн scope байх ёстой) ---
+    // scopes: middleware нь контроллер руу ОРОХООС ӨМНӨ зогсооно. Эрхийн
+    // дүрэм route файлыг уншихад л харагдаж байгаа нь давуу тал.
+    Route::apiResource('categories', CategoryController::class)
+        ->except(['index', 'show'])
+        ->middleware('scopes:catalog:manage');
 
-    // Зээл — бүх үйлдэл нэвтэрсэн хэрэглэгчид
+    Route::apiResource('authors', AuthorController::class)
+        ->except(['index', 'show'])
+        ->middleware('scopes:catalog:manage');
+
+    Route::apiResource('books', BookController::class)
+        ->except(['index', 'show'])
+        ->middleware('scopes:books:manage');
+
+    // --- Бүх нэвтэрсэн хэрэглэгч ---
     Route::get('/loans', [LoanController::class, 'index']);
     Route::post('/loans', [LoanController::class, 'store']);
     Route::get('/loans/{loan}', [LoanController::class, 'show']);
     Route::put('/loans/{loan}/return', [LoanController::class, 'returnBook']);
-    Route::delete('/loans/{loan}', [LoanController::class, 'destroy']);
+
+    // --- Зөвхөн админ ---
+    Route::delete('/loans/{loan}', [LoanController::class, 'destroy'])
+        ->middleware('scopes:loans:manage');
 });

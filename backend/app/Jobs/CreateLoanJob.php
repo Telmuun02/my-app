@@ -14,19 +14,20 @@ use Throwable;
 use Exception;
 
 /** 
- * тухайн ажлыг background доо ажлуулахын тулд хэрэглэдэг job 
- * 
- * үүн дээр queue ашиглаж байна. 
+ * Тухайн ажлыг queue-д оруулж, worker нь дараа нь гүйцэтгэнэ.
  */
 class CreateLoanJob implements ShouldQueue, ShouldBeUnique
 {
     use Queueable;
 
     public $tries = 3; // retry hiih.
-    public $backoff = [5, 10, 15];
+    public $backoff = [5, 10, 15]; // her hugatsaanii daraa hiihee medeh
 
     // herhen retry hiih ve medeh. 
 
+    /** 
+     * anhnii utga buyu parameter uudeer damjuulan ugch bn
+     */
     public function __construct(public array $data, public int $userId)
     {   
         // 

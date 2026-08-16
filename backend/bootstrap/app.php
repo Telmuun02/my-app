@@ -13,7 +13,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Passport-ийн scope middleware-ууд Laravel 11+ дээр автоматаар
+        // бүртгэгддэггүй тул гараар нэр өгнө.
         //
+        //   scopes:a,b  → БҮХ scope байх шаардлагатай
+        //   scope:a,b   → ЯМАР НЭГ нь байхад хангалттай
+        $middleware->alias([
+            'scopes' => \Laravel\Passport\Http\Middleware\CheckToken::class,
+            'scope'  => \Laravel\Passport\Http\Middleware\CheckTokenForAnyScope::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

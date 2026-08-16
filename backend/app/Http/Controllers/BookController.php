@@ -13,24 +13,18 @@ use Illuminate\Validation\ValidationException;
 /**
  * Номын CRUD үйлдлүүд.
  *
- * Жагсаалтын хариу нь кэшлэгддэг. Кэшийг устгахын оронд "хувилбарын дугаар"
- * ашигладаг: өгөгдөл өөрчлөгдөх бүрд books.version нэмэгдэж, өмнөх бүх түлхүүр
- * автоматаар хүчингүй болдог. Ингэснээр шүүлтүүрийн бүх хослолын түлхүүрийг
- * нэг бүрчлэн олж устгах шаардлагагүй.
+ * Ингэхдээ аль хэдийн өгөгдлийн сангаас 
+ * татсан өгөгдлүүдийг татаж дараагаар нь харах боломжтой болгоно.
  */
 class BookController extends Controller
 {
     /**
      * Номын жагсаалт — шүүлтүүр, хайлт, хуудаслалттай.  GET /api/books
-     
      */
     public function index(Request $request): JsonResponse
     {
-        // Ангилал, зохиолч, компанийг урьдчилан ачаалж N+1 асуулгаас сэргийлнэ.
         $query = Book::with(['category', 'authors', 'company']);
 
-        // --- Компаниар тусгаарлах ---
-        // Хэрэглэгч зөвхөн өөрийн компанийн номыг харна. Админ бүгдийг.
         $user = $request->user();
         $scope = 'all';
 
@@ -39,14 +33,11 @@ class BookController extends Controller
             $scope = "c{$user->company_id}";
         }
 
-        // 'all' нь "шүүхгүй" гэсэн утгатай тул хоосонтой адилтган алгасна.
         if ($request->filled('category') && $request->category !== 'all') {
             $name = $request->category;
             $query->whereHas('category', fn ($q) => $q->where('name', $name));
         }
 
-        // Хайлт нь номын гарчиг БОЛОН зохиолчийн нэр хоёуланг хамарна. Хаалтанд
-        // бүлэглэсний учир нь дээрх шүүлтүүртэй OR-оор холилдохоос сэргийлэх.
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -61,24 +52,15 @@ class BookController extends Controller
             $query->where('available_copies', '=', 0);
         }
 
-        // Кэшийн одоогийн хувилбар. Ном өөрчлөгдөхөд энэ тоо нэмэгддэг тул
-        // хуучин хувилбарын түлхүүрүүд дахин хэзээ ч уншигдахгүй.
         $version = Cache::get('books.version', 1);
 
-        // Түлхүүрт шүүлтүүрийн бүх утгыг оруулна — өөр шүүлтүүрийн үр дүн
-        // хоорондоо холилдохгүй байх ёстой.
         $page         = $request->input('page', 1);
         $category     = $request->input('category', 'all');
         $search       = $request->input('search', '');
         $availability = $request->input('availability', '');
 
-        // $scope ЗААВАЛ түлхүүрт орно. Үгүй бол Company 15-ын хэрэглэгчийн
-        // хүсэлтээр кэшлэгдсэн хариу Company 16-ын хэрэглэгчид буцаж,
-        // өөр компанийн номууд харагдана — алдаа ч заахгүй, зүгээр л
-        // буруу өгөгдөл. Кэшийн түлхүүрт шүүлтийн БҮХ хэмжигдэхүүн орох ёстой.
         $key = "books.v{$version}.{$scope}.{$category}.{$search}.{$availability}.page.{$page}";
 
-        // Кэшэд байвал шууд буцаана, үгүй бол closure-ыг ажиллуулж 60 секунд хадгална.
         $data = Cache::remember($key, 60, fn () => BookResource::collection($query->paginate(8))->response()->getData(true));
 
         return response()->json($data);
@@ -99,7 +81,6 @@ class BookController extends Controller
             'author_ids.*'   => 'exists:authors,id',
         ]);
 
-        // Шинэ номын бүх хувь эхэндээ боломжтой байна.
         $book = Book::create([
             'title'            => $validated['title'],
             'isbn'             => $validated['isbn'],
@@ -108,13 +89,10 @@ class BookController extends Controller
             'available_copies' => $validated['total_copies'],
         ]);
 
-        // Ном↔зохиолч нь олон-олон холбоо тул pivot хүснэгтээр холбоно.
         if (! empty($validated['author_ids'])) {
             $book->authors()->attach($validated['author_ids']);
         }
 
-        // Жагсаалтын кэшийг хүчингүй болгоно: хувилбар нэмэгдэхэд index()-ийн
-        // үүсгэдэг түлхүүр өөрчлөгдөж, хуучин бичлэгүүд уншигдахаа болино.
         Cache::put('books.version', Cache::get('books.version', 1) + 1);
 
         return response()->json($book->load(['category', 'authors']), 201);
@@ -128,9 +106,6 @@ class BookController extends Controller
      */
     public function show(Request $request, Book $book): JsonResponse
     {
-        // Жагсаалтыг шүүх нь ХАНГАЛТГҮЙ. Хэрэглэгч /api/books/42 гэж шууд
-        // дуудвал жагсаалтад харагдаагүй ном руу ч хандаж чадна (IDOR).
-        // Тиймээс нэг бүрчлэн авах үед ч эрхийг шалгана.
         $user = $request->user();
 
         if ($user->role !== 'admin' && $book->company_id !== $user->company_id) {
@@ -150,9 +125,6 @@ class BookController extends Controller
      */
     public function update(Request $request, Book $book): JsonResponse
     {
-        // 'sometimes' — талбар ирээгүй бол шалгахгүй өнгөрнө. Ингэснээр хэсэгчилсэн
-        // засвар хийх боломжтой. unique дүрэмд одоогийн id-г оруулсан нь өөрийнх
-        // нь ISBN-ийг "давхардсан" гэж үзэхээс сэргийлэх зорилготой.
         $validated = $request->validate([
             'title'        => 'sometimes|required|string|max:255',
             'isbn'         => 'sometimes|required|string|unique:books,isbn,' . $book->id,
@@ -164,13 +136,10 @@ class BookController extends Controller
 
         $book->update($validated);
 
-        // has() ашигласан нь чухал: author_ids хоосон массиваар ирвэл "бүх зохиолчийг
-        // салга" гэсэн санаатай үйлдэл тул sync() дуудагдах ёстой.
         if ($request->has('author_ids')) {
             $book->authors()->sync($validated['author_ids'] ?? []);
         }
 
-        // Өгөгдөл өөрчлөгдсөн тул жагсаалтын кэшийн хувилбарыг ахиулна.
         Cache::put('books.version', Cache::get('books.version', 1) + 1);
 
         return response()->json($book->load(['category', 'authors']));
@@ -183,7 +152,6 @@ class BookController extends Controller
     {
         $book->delete();
 
-        // Өгөгдөл өөрчлөгдсөн тул жагсаалтын кэшийн хувилбарыг ахиулна.
         Cache::put('books.version', Cache::get('books.version', 1) + 1);
 
         return response()->json(['message' => 'Ном устгагдлаа.']);

@@ -147,7 +147,18 @@ class AuthController extends Controller
             // token uusgeh
             // Passport-ын createToken() нь PersonalAccessTokenResult буцаадаг —
             // түүхий JWT нь ->accessToken дотор байна (Sanctum дээр ->plainTextToken байсан).
-            $token = $user->createToken('auth_token')->accessToken;
+            //
+            // Хоёр дахь аргумент нь SCOPE — токен дотор шатаагдана. Админ бүх
+            // эрхийг авна, энгийн хэрэглэгч нэгийг ч авахгүй.
+            //
+            // АНХААР: эдгээр нь токен ҮҮСЭХ мөчид тогтоогдоно. Хэрэглэгчийг
+            // дараа нь админ болговол хуучин токен нь эрхгүй хэвээр үлдэнэ —
+            // шинэ эрх авахын тулд ДАХИН НЭВТРЭХ шаардлагатай.
+            $scopes = $user->role === 'admin'
+                ? ['books:manage', 'catalog:manage', 'loans:manage']
+                : [];
+
+            $token = $user->createToken('auth_token', $scopes)->accessToken;
         } catch (ValidationException $e) {
             // aldaa shideh
             throw $e;

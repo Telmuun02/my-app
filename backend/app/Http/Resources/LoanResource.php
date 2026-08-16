@@ -25,19 +25,12 @@ class LoanResource extends JsonResource
             'loan_date'   => $this->loan_date,
             'due_date'    => $this->due_date,
             'return_date' => $this->return_date,
-
-            // Тооцоолсон талбар — клиент бүр өөрөө бодохгүйн тулд сервер хэлнэ.
             'returned'    => $this->return_date !== null,
-
-            // whenLoaded — харьцаа ачаалагдаагүй бол талбарыг ОГТ гаргахгүй.
-            // Ингэснээр санамсаргүй N+1 асуулга үүсэхээс сэргийлнэ.
             'book'        => $this->whenLoaded('book', fn () => [
                 'id'        => $this->book->id,
                 'title'     => $this->book->title,
                 'cover_url' => $this->book->coverUrl(),
             ]),
-
-            // Зөвхөн нэр — админы жагсаалтад хэн зээлснийг харуулахад хангалттай.
             'user'        => $this->whenLoaded('user', fn () => [
                 'id'   => $this->user->id,
                 'name' => $this->user->name,

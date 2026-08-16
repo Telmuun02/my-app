@@ -39,6 +39,31 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->environment('local')) {
             Passport::$validateKeyPermissions = false;
         }
+
+        $this->configureTokenScopes();
+
+        // Токенд `role` claim нэмэх өөрийн AccessToken классыг ашиглана.
+        Passport::useAccessTokenEntity(\App\Passport\AccessToken::class);
+    }
+
+    /**
+     * Токенд олгож болох эрхүүд (scope).
+     *
+     * Эдгээр нь ТОКЕН дотор хадгалагдана — өгөгдлийн сангаас уншигддаггүй.
+     * Тиймээс хэрэглэгчийн role-ыг өөрчилсөн ч ХУУЧИН токен хуучин эрхтэйгээ
+     * үлдэнэ; дахин нэвтрэх хүртэл шинэ эрх идэвхжихгүй.
+     *
+     * Scope нь "ямар ҮЙЛДЭЛ" гэдгийг л мэднэ. "Аль ОБЪЕКТ дээр" гэдгийг
+     * мэдэхгүй — тухайлбал 'books:manage' байлаа гэхэд тухайн ном хэрэглэгчийн
+     * компанийнх эсэхийг шалгахгүй. Тэрийг контроллер/Policy шалгана.
+     */
+    protected function configureTokenScopes(): void
+    {
+        Passport::tokensCan([
+            'books:manage'   => 'Ном нэмэх, засах, устгах',
+            'catalog:manage' => 'Ангилал, зохиолч удирдах',
+            'loans:manage'   => 'Бүх зээллэгийг үзэх, устгах',
+        ]);
     }
 
     /**

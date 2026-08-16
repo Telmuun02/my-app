@@ -11,7 +11,11 @@ use Illuminate\Validation\ValidationException;
 /**
  * Номын зээллэгийн CRUD үйлдлүүд.
  *
- * store буюу update хийх үед ээ queue ашиглаж байгаа.
+ * Хэрэглэгчийн зээллийг хадгалах даа queue ашиглан хадгална
+ * зээллэгийн хүсэлтийг баталгаажуулахад хугацаа шаардагдана. Энэ нь
+ * хэрэглэгчийн хүсэлтийг шууд боловсруулж, 
+ * өгөгдлийн санд хадгалахгүй гэсэн үг. Хүсэлтийг queue-д оруулсны дара
+ * * нь worker нь зээллэгийг үүсгэж, номын үлдэгдлийг бууруулна.
  */
 class LoanController extends Controller
 {
@@ -22,11 +26,8 @@ class LoanController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        // Ном, хэрэглэгчийг урьдчилан ачаалж байна. Үгүй бол жагсаалтын мөр бүрт
-        // нэмэлт хоёр асуулга явж N+1 асуудал үүснэ.
         $query = Loan::with(['book', 'user']);
 
-        // Эрхийн хязгаарлалт: админ биш бол бусдын зээллэг харагдахгүй.
         if ($request->user()->role !== 'admin') {
             $query->where('user_id', $request->user()->id);
         }
@@ -67,8 +68,6 @@ class LoanController extends Controller
      */
     public function returnBook(Loan $loan): JsonResponse
     {
-        // Давхар буцаалтаас хамгаална — эс бөгөөс available_copies нэг номын
-        // хувьд олон удаа нэмэгдэж, бодит үлдэгдлээс их болно.
         if ($loan->return_date !== null) {
             throw ValidationException::withMessages([
                 'loan' => ['Энэ ном аль хэдийн буцаагдсан байна.'],
@@ -87,9 +86,6 @@ class LoanController extends Controller
      */
     public function destroy(Loan $loan): JsonResponse
     {
-        // Буцаагдаагүй байхад устгаж байгаа бол тухайн хувь эргэж ирэхгүй тул
-        // үлдэгдлийг энд нөхөж нэмнэ. Буцаагдсан бол returnBook() аль хэдийн
-        // нэмсэн байгаа — давхар нэмэхээс сэргийлж нөхцөл шалгав.
         if ($loan->return_date === null) {
             $loan->book->increment('available_copies');
         }

@@ -30,16 +30,6 @@ class SendVerifyEmailJob implements ShouldQueue
         // baiguulagch
     }
 
-    /**
-     * Job-ийн middleware.
-     *
-     * RateLimited нь AppServiceProvider дотор тодорхойлсон 'verification-emails'
-     * хязгаарыг шалгана (минутад 60).
-     *
-     * dontRelease() — хязгаарт хүрсэн үед job-ыг queue руу БУЦААХГҮЙ, шууд
-     * цуцална. Үүнгүй бол Laravel хожим дахин оролдохоор түлхэж, хязгаарын
-     * ард дараалал үүсгэнэ. Бидний зорилго "цуцлах" тул dontRelease() хэрэгтэй.
-     */
     public function middleware(): array
     {
         return [(new RateLimited('verification-emails'))->dontRelease()];
