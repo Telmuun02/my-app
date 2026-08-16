@@ -23,13 +23,16 @@ Route::post('/email/verification-notification', [EmailVerificationController::cl
     ->middleware('throttle:5,1')
     ->name('verification.send');
 
-// Ном, ангилал, зохиолчийг зочид ч үзэж болно (жагсаах + харах)
+// Ангилал, зохиолчийг зочид ч үзэж болно
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}', [CategoryController::class, 'show']);
 Route::get('/authors', [AuthorController::class, 'index']);
 Route::get('/authors/{author}', [AuthorController::class, 'show']);
-Route::get('/books', [BookController::class, 'index']);
-Route::get('/books/{book}', [BookController::class, 'show']);
+
+// АНХААР: Ном ХАРАХ нь нээлттэй БАЙХАА больсон.
+// Ном бүр компанид харьяалагддаг тул хэрэглэгч зөвхөн өөрийн компанийн
+// номыг харах ёстой. Зочинд ямар компани гэдгийг тодорхойлох боломжгүй
+// учир нэвтрэхийг шаардана — доорх auth:api бүлгийг үзнэ үү.
 
 // prefix
 // mailable
@@ -46,6 +49,11 @@ Route::get('/books/{book}', [BookController::class, 'show']);
 Route::middleware('auth:api')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    // Ном үзэх — нэвтэрсэн байх шаардлагатай. Хэрэглэгч зөвхөн өөрийн
+    // компанийн номыг, админ бүгдийг харна (BookController-д шүүгдэнэ).
+    Route::get('/books', [BookController::class, 'index']);
+    Route::get('/books/{book}', [BookController::class, 'show']);
 });
 
 // 'verified' middleware нь JSON бус хүсэлтийг энэ нэртэй route руу чиглүүлэхийг

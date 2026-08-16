@@ -22,6 +22,8 @@ class BookResource extends JsonResource
             'available' => $this->available_copies,
             // Харьцаануудыг зөвхөн нэрээр нь (объект биш) — хамгийн бага өгөгдөл
             'category'  => $this->category?->name,
+            // Аль компанийн ном болохыг картан дээр харуулна
+            'company'   => $this->company?->name,
             // ->all() → Collection-ыг plain массив болгоно (cache-д зөв serialize болно)
             'authors'   => $this->authors->pluck('name')->all(),
             // URL үүсгэх логик Book загвар дээр — BookDetailResource ч мөн адил дуудна

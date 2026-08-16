@@ -17,6 +17,7 @@ function normalizeBook(book) {
     title: book.title,
     isbn: book.isbn,
     category: book.category?.name ?? book.category ?? "Uncategorized",
+    company: book.company?.name ?? book.company ?? null,
     authors: (book.authors ?? []).map((a) => a?.name ?? a),
     available: book.available ?? book.available_copies ?? 0,
     total: book.total ?? book.total_copies,
@@ -153,7 +154,10 @@ function BookDetail({ user }) {
 
         {/* Баруун тал: мэдээлэл */}
         <div className="detail__info">
-          <span className="badge-outline">{book.category}</span>
+          <div className="tag-row">
+            <span className="badge-outline">{book.category}</span>
+            {book.company && <span className="badge-company">{book.company}</span>}
+          </div>
           <h1 className="detail__title">{book.title}</h1>
           <p className="detail__authors">{book.authors.join(", ") || "Unknown author"}</p>
 

@@ -118,6 +118,25 @@
   color: var(--text-muted);
 }
 
+/* Шошгуудын мөр — багтахгүй бол доош дамжина. BookCard ба BookDetail. */
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Байгууллагын шошго — ангиллын шошгоноос ялгарахын тулд дүүргэсэн
+   (хүрээтэй биш) хэлбэртэй. BookCard ба BookDetail хоёулаа ашиглана. */
+.badge-company {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--active-bg);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+
 /* ===================== Мэдэгдлийн хайрцаг =====================
    Өмнө нь .verify__ok ба .detail__message хоёр яг ижил байсан. */
 .notice-ok,

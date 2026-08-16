@@ -28,6 +28,17 @@ class Book extends Model
         return $this->belongsToMany(Author::class, 'author_book', 'book_id', 'author_id');
     }
 
+    /**
+     * Номыг эзэмшигч компани.
+     *
+     * Company::books()-ийн урвуу тал. Ном бүр яг нэг компанид харьяалагддаг
+     * бөгөөд хэрэглэгч зөвхөн өөрийн компанийн номыг харна (BookController).
+     */
+    public function company()
+    {
+        return $this->belongsTo(Company::class, 'company_id', 'id');
+    }
+
     public function loans()
     {
         return $this->hasMany(Loan::class, 'book_id', 'id');

@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Passport\Passport;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,6 +23,22 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureRateLimiters();
+
+        /*
+         * Passport-ийн түлхүүрийн эрхийн шалгалт.
+         *
+         * league/oauth2-server нь хувийн түлхүүрийн эрх 600/660 байхыг шаарддаг.
+         * Docker дээр Windows-ийн хавтас bind mount хийгдэхэд файлын систем
+         * БҮХ файлыг 777 гэж мэдээлдэг — chmod хийсэн ч өөрчлөгддөггүй, учир нь
+         * Windows дээр POSIX эрх гэж байхгүй.
+         *
+         * Тиймээс хөгжүүлэлтийн орчинд шалгалтыг унтраана. Production-д
+         * (жинхэнэ Linux файлын систем дээр) шалгалт ХЭВЭЭР үлдэнэ — тэнд
+         * энэ нь хамгаалалтын бодит утгатай.
+         */
+        if ($this->app->environment('local')) {
+            Passport::$validateKeyPermissions = false;
+        }
     }
 
     /**

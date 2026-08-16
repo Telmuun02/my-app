@@ -26,8 +26,18 @@ class BookController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        // Ангилал, зохиолчийг урьдчилан ачаалж N+1 асуулгаас сэргийлнэ.
-        $query = Book::with(['category', 'authors']);
+        // Ангилал, зохиолч, компанийг урьдчилан ачаалж N+1 асуулгаас сэргийлнэ.
+        $query = Book::with(['category', 'authors', 'company']);
+
+        // --- Компаниар тусгаарлах ---
+        // Хэрэглэгч зөвхөн өөрийн компанийн номыг харна. Админ бүгдийг.
+        $user = $request->user();
+        $scope = 'all';
+
+        if ($user->role !== 'admin') {
+            $query->where('company_id', $user->company_id);
+            $scope = "c{$user->company_id}";
+        }
 
         // 'all' нь "шүүхгүй" гэсэн утгатай тул хоосонтой адилтган алгасна.
         if ($request->filled('category') && $request->category !== 'all') {
@@ -62,7 +72,11 @@ class BookController extends Controller
         $search       = $request->input('search', '');
         $availability = $request->input('availability', '');
 
-        $key = "books.v{$version}.{$category}.{$search}.{$availability}.page.{$page}";
+        // $scope ЗААВАЛ түлхүүрт орно. Үгүй бол Company 15-ын хэрэглэгчийн
+        // хүсэлтээр кэшлэгдсэн хариу Company 16-ын хэрэглэгчид буцаж,
+        // өөр компанийн номууд харагдана — алдаа ч заахгүй, зүгээр л
+        // буруу өгөгдөл. Кэшийн түлхүүрт шүүлтийн БҮХ хэмжигдэхүүн орох ёстой.
+        $key = "books.v{$version}.{$scope}.{$category}.{$search}.{$availability}.page.{$page}";
 
         // Кэшэд байвал шууд буцаана, үгүй бол closure-ыг ажиллуулж 60 секунд хадгална.
         $data = Cache::remember($key, 60, fn () => BookResource::collection($query->paginate(8))->response()->getData(true));
@@ -112,9 +126,20 @@ class BookController extends Controller
      * Resource ашигласан нь чухал: index() ч мөн resource буцаадаг тул нэг
      * entity хоёр өөр хэлбэртэй байхаас сэргийлнэ. Мөн cover_url энд ирнэ.
      */
-    public function show(Book $book): JsonResponse
+    public function show(Request $request, Book $book): JsonResponse
     {
-        $book->load(['category', 'authors']);
+        // Жагсаалтыг шүүх нь ХАНГАЛТГҮЙ. Хэрэглэгч /api/books/42 гэж шууд
+        // дуудвал жагсаалтад харагдаагүй ном руу ч хандаж чадна (IDOR).
+        // Тиймээс нэг бүрчлэн авах үед ч эрхийг шалгана.
+        $user = $request->user();
+
+        if ($user->role !== 'admin' && $book->company_id !== $user->company_id) {
+            return response()->json([
+                'message' => 'Энэ ном таны компанид харьяалагдахгүй байна.',
+            ], 403);
+        }
+
+        $book->load(['category', 'authors', 'company']);
 
         return response()->json(new BookDetailResource($book));
     }

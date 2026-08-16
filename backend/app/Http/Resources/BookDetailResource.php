@@ -28,6 +28,7 @@ class BookDetailResource extends JsonResource
             'available' => $this->available_copies,
             'total'     => $this->total_copies,
             'category'  => $this->category?->name,
+            'company'   => $this->company?->name,
             'authors'   => $this->authors->pluck('name')->all(),
             'cover_url' => $this->coverUrl(),
         ];

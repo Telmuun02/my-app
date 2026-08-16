@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import BookCard from "../components/BookCard";
 import Pagination from "../components/Pagination";
@@ -14,6 +15,7 @@ function normalizeBook(book) {
     title: book.title,
     author: book.authors?.join(", ") || "Unknown",
     category: book.category ?? "Uncategorized",
+    company: book.company ?? null,
     available: book.available,
     cover_url: book.cover_url,
   };
@@ -43,6 +45,15 @@ function Catalog({ query, onQueryChange, user }) {
 
   // Ном: хуудас/шүүлт/хайлт өөрчлөгдөх бүрд server-ээс тухайн хуудсыг татна.
   useEffect(() => {
+    // Нэвтрээгүй бол хүсэлт огт явуулахгүй — /books нь одоо auth шаарддаг,
+    // 401 авах нь дэмий. Доор нэвтрэх урилга харуулна.
+    if (!user) {
+      setBooks([]);
+      setTotalCount(0);
+      setLoading(false);
+      return;
+    }
+
     let active = true;
     setLoading(true);
 
@@ -61,8 +72,13 @@ function Catalog({ query, onQueryChange, user }) {
         setTotalCount(res.data.meta.total); // нийт хэдэн ном (шүүлтийн дараа)
         setError("");
       })
-      .catch(() => {
-        if (active) setError("Өгөгдөл ачаалж чадсангүй. Backend (php artisan serve) асаалттай юу?");
+      .catch((err) => {
+        if (!active) return;
+        setError(
+          err.response?.status === 401
+            ? "Нэвтрэх хугацаа дууссан байна. Дахин нэвтэрнэ үү."
+            : "Өгөгдөл ачаалж чадсангүй. Backend асаалттай юу?"
+        );
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -71,7 +87,7 @@ function Catalog({ query, onQueryChange, user }) {
     return () => {
       active = false;
     };
-  }, [page, category, availability, query]);
+  }, [page, category, availability, query, user]);
 
   // Шүүлт/хайлт өөрчлөгдвөл эхний хуудас руу буцаана.
   useEffect(() => {
@@ -94,6 +110,29 @@ function Catalog({ query, onQueryChange, user }) {
     }
   };
 
+  // Нэвтрээгүй үед: каталогийн оронд нэвтрэх урилга.
+  // Ном бүр компанид харьяалагддаг тул хэн болохыг мэдэхгүйгээр юу
+  // харуулахыг тодорхойлох боломжгүй.
+  if (!user) {
+    return (
+      <div className="page">
+        <h1 className="page__title">Library Catalog</h1>
+        <p className="empty-state">
+          Номын жагсаалтыг үзэхийн тулд нэвтэрнэ үү. Та зөвхөн өөрийн
+          байгууллагад харьяалагдах номыг харах боломжтой.
+        </p>
+        <div className="detail__actions">
+          <Link to="/signin" className="btn-primary">
+            Нэвтрэх
+          </Link>
+          <Link to="/register" className="btn-text">
+            Бүртгүүлэх
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="layout">
       <Sidebar
@@ -107,7 +146,15 @@ function Catalog({ query, onQueryChange, user }) {
       <main className="content">
         <div className="content__head">
           <h1>Library Catalog</h1>
-          <p className="content__count">{totalCount} books found</p>
+          <p className="content__count">
+            {totalCount} books found
+            {/* Админ бүх компанийн номыг харна — тэр ялгааг тодорхой хэлнэ */}
+            {user.role === "admin"
+              ? " · бүх байгууллага"
+              : user.company?.name
+                ? ` · ${user.company.name}`
+                : ""}
+          </p>
         </div>
 
         <div className="search-box content__search">

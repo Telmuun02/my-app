@@ -57,7 +57,12 @@ function BookCard({ book, user, onBorrow }) {
         <div className="card__body">
           <h3 className="card__title">{book.title}</h3>
           <p className="card__author">{book.author}</p>
-          <span className="badge-outline">{book.category}</span>
+          <div className="tag-row">
+            <span className="badge-outline">{book.category}</span>
+            {/* Аль байгууллагын ном болох нь. Админ олон компанийн номыг
+                зэрэг хардаг тул энэ ялгаа чухал. */}
+            {book.company && <span className="badge-company">{book.company}</span>}
+          </div>
         </div>
       </Link>
 
