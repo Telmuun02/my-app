@@ -29,6 +29,7 @@ class LoanRegistered implements ShouldBroadcast
     public function broadcastOn(): array
     {   
         return [
+            // private channel ruu ilgeeh ba uuniig listener deer sonsoh bolomjtoi
             new PrivateChannel('loan' . $this->loan->id),
         ];
     }

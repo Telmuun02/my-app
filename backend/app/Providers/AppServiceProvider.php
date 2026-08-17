@@ -10,7 +10,9 @@ use Laravel\Passport\Passport;
 class AppServiceProvider extends ServiceProvider
 {
     /**
-     * Register any application services.
+     * register() метод нь Service Container-д зүйл бүртгэх (bind хийх) 
+     * зориулалттай. Өөрөөр хэлбэл: "энэ interface/классыг дуудвал, ийм 
+     * зүйл өг" гэж Laravel-д зааж өгдөг газар
      */
     public function register(): void
     {
@@ -18,31 +20,21 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Bootstrap any application services.
+     * boot() метод нь бүх Service Provider-ийн register() метод дууссаны 
+     * дараа ажилладаг. Энэ мөчид Laravel-ийн бүх сервис, бусад 
+     * provider-уудын бүртгэсэн зүйлс бэлэн болсон байдаг тул та 
+     * тэдгээрийг чөлөөтэй дуудаж, ашиглаж болно.
      */
     public function boot(): void
     {
         $this->configureRateLimiters();
 
-        /*
-         * Passport-ийн түлхүүрийн эрхийн шалгалт.
-         *
-         * league/oauth2-server нь хувийн түлхүүрийн эрх 600/660 байхыг шаарддаг.
-         * Docker дээр Windows-ийн хавтас bind mount хийгдэхэд файлын систем
-         * БҮХ файлыг 777 гэж мэдээлдэг — chmod хийсэн ч өөрчлөгддөггүй, учир нь
-         * Windows дээр POSIX эрх гэж байхгүй.
-         *
-         * Тиймээс хөгжүүлэлтийн орчинд шалгалтыг унтраана. Production-д
-         * (жинхэнэ Linux файлын систем дээр) шалгалт ХЭВЭЭР үлдэнэ — тэнд
-         * энэ нь хамгаалалтын бодит утгатай.
-         */
         if ($this->app->environment('local')) {
             Passport::$validateKeyPermissions = false;
         }
 
         $this->configureTokenScopes();
 
-        // Токенд `role` claim нэмэх өөрийн AccessToken классыг ашиглана.
         Passport::useAccessTokenEntity(\App\Passport\AccessToken::class);
     }
 
@@ -71,19 +63,6 @@ class AppServiceProvider extends ServiceProvider
      */
     protected function configureRateLimiters(): void
     {
-        /*
-         * Баталгаажуулах и-мэйл — минутад хамгийн ихдээ 60.
-         *
-         * Энэ нь БҮХ хэрэглэгчийг нийтэд нь хамарсан дээд хязгаар (->by() өгөөгүй
-         * тул түлхүүр нь хязгаарлагчийн нэр өөрөө). Зорилго нь SMTP нийлүүлэгчийн
-         * квотыг хамгаалах.
-         *
-         * Хэрэглэгч тус бүрээр хязгаарлахыг хүсвэл:
-         *   return Limit::perMinute(60)->by($job->user->id);
-         *
-         * Хүсэлт бүрийн түвшний хамгаалалт нь үүнээс тусдаа — routes/api.php дээрх
-         * throttle:5,1 нь нэг IP-г минутад 5 удаагаар хязгаарладаг.
-         */
         RateLimiter::for('verification-emails', fn () => Limit::perMinute(60));
     }
 }

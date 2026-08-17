@@ -8,18 +8,28 @@ use Illuminate\Database\QueryException;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash; 
-use Illuminate\Support\Facades\Log;  // pattern 
+use Illuminate\Support\Facades\Log;   
 use Illuminate\Validation\ValidationException;
 
- /**
-  * Authenti
-  */
+    /**
+     * Хэрэглэгчийн бүртгэл, нэвтрэлт, гарах үйлдлүүд.
+     * 
+     * register, login, me, logout
+     */
 class AuthController extends Controller
 {
-    // register function
+    /**
+     * register — шинэ хэрэглэгч бүртгэх.  POST /api/register
+     * 
+     * хэрэглэгчийн мэдээллийг paremeter ээр авч, хэрэглэгч үүсгэж, баталгаажуулах и-мэйл илгээдэг.
+     * Ингэхдээ job ашиглан  mail илгээхийг queue-д оруулна.
+     * dispatchSync() ашиглаж байгаа нь queue-д оруулахгүйгээр шууд ажиллуулна гэсэн үг.
+     * 
+     * Тогтмол log хийсэн учир хамаг мэдээлэл алдаа, амжилттай бүртгэл, нэвтрэлт, гарах үйлдлийг тэмдэглэнэ
+     */
+
     public function register(Request $request)
     {
-        // request iin shaardlaga
         $validated = $request->validate([
             'name'       => 'required|string|max:255',
             'email'      => 'required|string|email|max:255|unique:users',
@@ -27,14 +37,11 @@ class AuthController extends Controller
             'company_id' => 'required|exists:companies,id',    // байгаа компанийг заасан эсэхийг шалгана
         ]);
 
-        // Debug log.
         Log::debug('Бүртгэлийн хүсэлт боловсруулж байна.', [
             'email' => $validated['email'],
         ]);
 
-        // aldaa oloh
         try {
-            // shine user uusgeh gej oroldoh
             $user = User::create([
                 'name'       => $validated['name'],
                 'email'      => $validated['email'],
@@ -43,17 +50,14 @@ class AuthController extends Controller
             ]);
 
             // ЭНД token үүсгэхгүй!
-            // Хатуу горим: и-мэйл баталгаажтал ямар ч token гарахгүй.
-            // Хэрэглэгч мэйл дэх холбоосыг дараад, дараа нь /login-оор нэвтэрнэ.
+            // Хатуу горим: и-мэйл баталгаажтал ямар ч token гарахгүй
         } catch (UniqueConstraintViolationException $e) {
-            // Email davhtsval.
             Log::warning('Бүртэлтэй и-мэйл байна.', [
                 'email' => $validated['email'],
             ]);
 
             return response()->json(['message' => 'Энэ и-мэйл аль хэдийн бүртгэлтэй байна.'], 409);
         } catch (QueryException $e) {
-            // Busad aldaa.
             Log::error('Хэрэглэгч бүртгэхэд өгөгдлийн сангийн алдаа гарлаа.', [
                 'email'     => $validated['email'],
                 'exception' => $e->getMessage(),
@@ -61,7 +65,6 @@ class AuthController extends Controller
 
             return response()->json(['message' => 'Өгөгдлийн сангийн алдаа гарлаа.'], 500);
         } catch (\Throwable $e) {
-            // Throw hiisen aldaa.
             Log::error('Алдаа гарлаа.', [
                 'email'     => $validated['email'],
                 'exception' => $e->getMessage(),
@@ -70,30 +73,16 @@ class AuthController extends Controller
             return response()->json(['message' => 'Хэрэглэгч үүсгэхэд алдаа гарлаа.'], 500);
         }
 
-        // INFO log - user burtgesen g shalgah.
         Log::info('Шинэ хэрэглэгч бүртгэгдлээ.', [
             'user_id' => $user->id,
             'email'   => $user->email,
         ]);
 
-        // Баталгаажуулах и-мэйл илгээх.
-        //
-        // dispatchSync() — job-ыг queue-д оруулахгүй, энэ хүсэлтийн дотор шууд
-        // ажиллуулна. Тиймээс queue:work worker асаах шаардлагагүй.
-        //
-        // try/catch ЗААВАЛ хэрэгтэй: sync үед job доторх алдаа энд давхиж гардаг.
-        // Мэйл яваагүй ч хэрэглэгч аль хэдийн үүссэн тул 500 буцаах нь буруу —
-        // алдааг зөвхөн тэмдэглээд, бүртгэлийг амжилттай гэж хариулна.
-        // Хэрэглэгч дараа нь /api/email/verification-notification-оор дахин авч болно.
         try {
             SendVerifyEmailJob::dispatchSync($user);
         } catch (\Throwable $e) {
-            // Дэлгэрэнгүй лог нь job-ийн failed() дотор аль хэдийн бичигдсэн.
         }
 
-        // Token БАЙХГҮЙ — frontend "мэйлээ шалгана уу" дэлгэц харуулна.
-        // 'email'-ыг буцааж байгаа нь тэр дэлгэц дээр хаягийг харуулах,
-        // мөн "дахин илгээх" товчинд ашиглахад хэрэгтэй.
         return response()->json([
             'user'    => $user->load('company'),
             'email'   => $user->email,
@@ -101,36 +90,36 @@ class AuthController extends Controller
         ], 201);
     }
 
+    /**
+     * login function хэрэглэгчийн өгсөн мэдээллийг өгөгдлийн сан дахь хэрэглэгчийн
+     * мэдээлэлтэй нь харьцуулж, зөв бол token үүсгэнэ.
+     * 
+     * Энэ тохиолдолд mail хэрэггүй шууд ашиглах боломжтой.
+     * 
+     * logger байгаа
+     */
     
     public function login(Request $request)
     {
-        // login shaardlaguud
         $validated = $request->validate([
             'email'    => 'required|string|email',
             'password' => 'required|string',
         ]);
 
         try {
-            // email deer useriig olno, company ni load hiine
             $user = User::where('email', $validated['email'])->with('company')->first();
 
-            // nuuts ug ni taarch baigaag ni shalgah
             if (! $user || ! Hash::check($validated['password'], $user->password)) {
-                // Amjiltgu nevtreh uildliig ni medegdeh.
                 Log::warning('Амжилтгүй нэвтрэх оролдлого.', [
                     'email' => $validated['email'],
                     'ip'    => $request->ip(),
                 ]);
 
-                // aldaa shideh
                 throw ValidationException::withMessages([
                     'email' => ['И-мэйл эсвэл нууц үг буруу байна.'],
                 ]);
             }
 
-            // ХАТУУ ГОРИМ: и-мэйл баталгаажаагүй бол token огт өгөхгүй.
-            // Нууц үг зөв гэдгийг мэдэж байгаа тул email_unverified туг буцаана —
-            // frontend үүгээр "дахин илгээх" товчийг харуулна.
             if (! $user->hasVerifiedEmail()) {
                 Log::warning('Баталгаажаагүй и-мэйлээр нэвтрэх оролдлого.', [
                     'user_id' => $user->id,
@@ -144,26 +133,22 @@ class AuthController extends Controller
                 ], 403);
             }
 
-            // token uusgeh
-            // Passport-ын createToken() нь PersonalAccessTokenResult буцаадаг —
-            // түүхий JWT нь ->accessToken дотор байна (Sanctum дээр ->plainTextToken байсан).
+            // Passport-ийн createToken() нь PersonalAccessTokenResult буцаана.
+            // Түүхий JWT нь ->accessToken дотор байна.
+            // (Sanctum дээр ->plainTextToken байдаг — Passport дээр тийм
+            // property БАЙХГҮЙ тул null болж, нэвтрэлт чимээгүй эвдэрдэг.)
             //
-            // Хоёр дахь аргумент нь SCOPE — токен дотор шатаагдана. Админ бүх
-            // эрхийг авна, энгийн хэрэглэгч нэгийг ч авахгүй.
-            //
-            // АНХААР: эдгээр нь токен ҮҮСЭХ мөчид тогтоогдоно. Хэрэглэгчийг
-            // дараа нь админ болговол хуучин токен нь эрхгүй хэвээр үлдэнэ —
-            // шинэ эрх авахын тулд ДАХИН НЭВТРЭХ шаардлагатай.
+            // Хоёр дахь аргумент нь scope — токен дотор шатаагдана. Админ бүх
+            // эрхийг авна. АНХААР: энэ нь токен үүсэх мөчид тогтоогдоно, role
+            // дараа өөрчлөгдвөл дахин нэвтрэх хүртэл хуучин эрхтэй хэвээр.
             $scopes = $user->role === 'admin'
                 ? ['books:manage', 'catalog:manage', 'loans:manage']
                 : [];
 
             $token = $user->createToken('auth_token', $scopes)->accessToken;
         } catch (ValidationException $e) {
-            // aldaa shideh
             throw $e;
         } catch (QueryException $e) {
-            // Өгөгдлийн сангийн алдаа .
             Log::error('Нэвтрэхэд өгөгдлийн сангийн алдаа гарлаа.', [
                 'email'     => $validated['email'],
                 'exception' => $e->getMessage(),
@@ -171,7 +156,6 @@ class AuthController extends Controller
 
             return response()->json(['message' => 'Өгөгдлийн сангийн алдаа гарлаа.'], 500);
         } catch (\Throwable $e) {
-            // Бусад бүх гэнэтийн алдаа.
             Log::error('Нэвтрэхэд гэнэтийн алдаа гарлаа.', [
                 'email'     => $validated['email'],
                 'exception' => $e->getMessage(),
@@ -180,25 +164,24 @@ class AuthController extends Controller
             return response()->json(['message' => 'Нэвтрэхэд алдаа гарлаа.'], 500);
         }
 
-        // INFO — амжилттай нэвтрэлт
         Log::info('Хэрэглэгч нэвтэрлээ.', [
             'user_id' => $user->id,
             'email'   => $user->email,
         ]);
 
         return response()->json([
-            'user'  => $user,   // company нь дээр with('company')-оор аль хэдийн ачаалагдсан
+            'user'  => $user,   
             'token' => $token,
         ]);
     }
 
     /**
-     * Нэвтэрсэн хэрэглэгчийн мэдээлэл.
+     * me function нь одоогийн хэрэглэгчийн мэдээллийг буцаана.  GET /api/me
+     * 
+     * load() ашигласан учир company мэдээллийг мөн буцаана.
      */
     public function me(Request $request)
     {
-        // auth:api middleware дамжсан бол $request->user() нь тухайн хэрэглэгч.
-        // ard ni load('company') hiih ni company niih ni medeellig hamtad ni butsaana
         return response()->json($request->user()->load('company'));
     }
 
@@ -207,15 +190,14 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {   
-        // id gaar ni useriig olno
         $userId = $request->user()->id;
 
-        // token iig ni ustgana
-        // Passport дээр мөрийг устгадаггүй, revoked = true болгон тэмдэглэдэг.
-        // Хүчингүй болсон бичлэгүүдийг дараа нь `php artisan passport:purge`-ээр цэвэрлэнэ.
+        // Passport дээр токеныг УСТГАДАГГҮЙ, revoked = true болгож тэмдэглэдэг.
+        // Ингэснээр аудитын мөр үлдэж, хэзээ ямар токен цуцлагдсаныг хардаг.
+        // (currentAccessToken()->delete() нь Sanctum-ийн API — Passport дээр
+        // тийм метод байхгүй.)
         $request->user()->token()->revoke();
 
-        // INFO — хэрэглэгч гарсныг тэмдэглэнэ.
         Log::info('Хэрэглэгч гарлаа.', [
             'user_id' => $userId,
         ]);

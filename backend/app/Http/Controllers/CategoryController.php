@@ -52,8 +52,6 @@ class CategoryController extends Controller
      */
     public function update(Request $request, Category $category): JsonResponse
     {
-        // unique дүрэмд одоогийн id-г үл хамаарах болгож өгсөн — эс бөгөөс
-        // ангилал өөрийнхөө нэрээр хадгалагдахад "давхардсан" гэж алдаа өгнө.
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
         ]);
