@@ -72,8 +72,6 @@ services:
       MAIL_PASSWORD: ""
       MAIL_ENCRYPTION: ""
 
-      # 1 = тохиргоог энэ контейнер хийнэ (composer, migrate, passport, seed)
-      SETUP: "1"
     # entrypoint нь тохиргоог хийгээд, дараа нь доорх command-ыг exec хийнэ.
     entrypoint: ["bash", "initial.sh"]
     # `php artisan serve` БИШ гэдгийг анхаар.
@@ -124,14 +122,12 @@ services:
     # ажлаа дуусгадаг. 10 секундын анхдагч хугацаа CreateLoanJob-д хүрэлцэхгүй
     # байж болзошгүй тул уртасгав — эс бөгөөс ажил дундуураа тасарна.
     stop_grace_period: 30s
-    # Ижил entrypoint, гэхдээ SETUP=0 — тохиргоог давхар хийхгүй, зөвхөн
-    # backend дуустал хүлээгээд queue:work руу шилжинэ.
+    # Backend-тэй ижил entrypoint, зөвхөн command нь өөр.
     entrypoint: ["bash", "initial.sh"]
     command: ["php", "artisan", "queue:work", "--tries=3", "--backoff=5"]
     env_file:
       - ./backend/.env
     environment:
-      SETUP: "0"
       DB_CONNECTION: mysql
       DB_HOST: db
       DB_PORT: 3306
@@ -146,8 +142,12 @@ services:
     volumes:
       - ./backend:/app
       - backend-vendor:/app/vendor
+    # db биш BACKEND-ийг хүлээнэ — тэр нь эрүүл болсон гэдэг нь миграц дуусчихсан
+    # гэсэн үг. Ингэснээр хоёр контейнер ЗЭРЭГ migrate ажиллуулахгүй бөгөөд
+    # queue:work нь `jobs` хүснэгт үүсэхээс өмнө асаад унахгүй.
+    # (backend өөрөө db-г хүлээдэг тул db дамжуулан баталгаажна.)
     depends_on:
-      db:
+      backend:
         condition: service_healthy
 
   # --------------------------------------------------------- frontend -----
