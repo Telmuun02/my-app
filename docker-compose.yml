@@ -199,6 +199,70 @@ services:
       - "1025:1025" # SMTP
       - "8025:8025" # Веб UI — баталгаажуулах мэйлийг эндээс уншина
 
+  # ----------------------------------------------------- backend-prod -----
+  # PROD image-ийг локал дээр турших. Энгийн `up` үед АСАХГҮЙ (profile).
+  #
+  #   export PASSPORT_PRIVATE_KEY="$(cat backend/storage/oauth-private.key)"
+  #   export PASSPORT_PUBLIC_KEY="$(cat backend/storage/oauth-public.key)"
+  #   docker compose --profile prodtest up --build backend-prod
+  #
+  # ЯАГААД ХЭРЭГТЭЙ ВЭ: prod stage (nginx + php-fpm + supervisor) нь өнөөг
+  # хүртэл нэг ч удаа баригдаж, ажиллаж байгаагүй. Түүнийг анх удаа Cloud Run
+  # дотор ажиллуулах нь debug хийхэд хамгийн муу газар.
+  backend-prod:
+    profiles: ["prodtest"]
+    build:
+      context: ./backend
+      target: prod
+    # VOLUME БАЙХГҮЙ — энэ нь санаатай.
+    #
+    # dev дээр ./backend нь /app дээр mount хийгдэж, image доторх агуулгыг
+    # бүрэн далдалдаг. Тиймээс хостын oauth-*.key харагдаж, түлхүүр байхгүй
+    # алдаа хэзээ ч илэрдэггүй. Энд mount байхгүй тул image дотор ЮУ байгаа
+    # нь яг тэр чигээрээ ажиллана — Cloud Run дээрхтэй адил.
+    env_file:
+      - ./backend/.env
+    environment:
+      # .env доторх local утгуудыг дарж бичнэ.
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_URL: http://localhost:8001
+      LOG_CHANNEL: stderr
+
+      # Түлхүүр ФАЙЛААР биш, ОРЧНЫ ХУВЬСАГЧААР ирнэ — Cloud Run дээр
+      # Secret Manager-ээс яг ингэж ирэх болно.
+      #
+      # `:-` (хоосон анхдагч) ашигласан шалтгаан: compose нь profile-аар
+      # хаагдсан service-ийг ч ГЭСЭН interpolate хийдэг. `:?` тавибал энгийн
+      # `docker compose up` хүртэл алдаа өгч, өдөр тутмын ажил тасална.
+      #
+      # Хэрэв export хийхээ мартвал хувьсагч хоосон ирнэ → Passport файл руу
+      # буцаж ханддаг → image дотор файл байхгүй → keys:verify унана.
+      # Энэ бол яг тэр алдаа бөгөөд мессеж нь юу хийхийг хэлж өгнө.
+      PASSPORT_PRIVATE_KEY: ${PASSPORT_PRIVATE_KEY:-}
+      PASSPORT_PUBLIC_KEY: ${PASSPORT_PUBLIC_KEY:-}
+
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: library
+      DB_USERNAME: folio
+      DB_PASSWORD: folio
+
+      QUEUE_CONNECTION: database
+      CACHE_STORE: database
+      SESSION_DRIVER: database
+
+      MAIL_MAILER: smtp
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+    ports:
+      # dev backend нь 8000-г эзэлсэн тул 8001 руу гаргав.
+      - "8001:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   db-data:
   backend-vendor:
