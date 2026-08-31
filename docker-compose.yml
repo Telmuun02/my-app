@@ -37,6 +37,12 @@ services:
 
   # ---------------------------------------------------------- backend -----
   backend:
+    # Compose нь `image:` байхгүй үед {project}-{service} гэсэн автомат нэр
+    # өгдөг (websites-backend). Тэр нэр нь namespace-гүй тул Docker Hub руу
+    # push хийж БОЛДОГГҮЙ — Docker түүнийг албан ёсны library/ орон зайд
+    # хамаатуулж, эрхийг нь татгалзана. Энд нэрийг зааж өгснөөр build хийхэд
+    # л шууд зөв tag-тай гарч, гараар `docker tag` хийх шат үгүй болно.
+    image: tishkanb/websites-backend:1.0.1
     build:
       context: ./backend
       target: dev
@@ -114,6 +120,9 @@ services:
   # ------------------------------------------------------------ queue -----
   queue:
     # Backend-тэй ЯГ ижил image — зөвхөн ажиллуулах команд нь өөр.
+    # (Хоёуланд нь НЭГ ижил `image:` утга өгвөл Compose нэг л удаа барьж,
+    #  хоёр service хуваалцана — ~1.1 GB хэмнэнэ. Одоогоор тусад нь үлдээв.)
+    image: tishkanb/websites-queue:1.0.1
     build:
       context: ./backend
       target: dev
@@ -152,6 +161,7 @@ services:
 
   # --------------------------------------------------------- frontend -----
   frontend:
+    image: tishkanb/websites-frontend:1.0.1
     build:
       context: ./frontend
       target: dev
@@ -211,6 +221,7 @@ services:
   # дотор ажиллуулах нь debug хийхэд хамгийн муу газар.
   backend-prod:
     profiles: ["prodtest"]
+    image: tishkanb/websites-backend-prod:1.0.1
     build:
       context: ./backend
       target: prod
