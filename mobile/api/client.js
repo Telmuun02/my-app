@@ -12,6 +12,10 @@
  * 2. import.meta.env БАЙХГҮЙ.
  *    Vite-ийн import.meta.env.VITE_API_URL → Expo дээр process.env.EXPO_PUBLIC_*.
  *    Metro нь bundle хийхдээ энэ утгыг кодод шууд бичиж оруулна.
+ *
+ * ЭНЭ ФАЙЛ .js — тип нь JSDoc тайлбар дотор амьдарна. TypeScript нь JSDoc-ийг
+ * жинхэнэ тип гэж уншдаг тул .tsx дэлгэцүүд эндээс `type User`-ыг хэвээр
+ * импортолж чадна.
  */
 
 // axios нь `axios.create(...)` гэсэн default экспортоос гадна ЯГ ижил
@@ -34,34 +38,51 @@ const USER_KEY = 'folio_user';
  *
  * SecureStore нь "жинхэнэ" эх сурвалж (апп хаагдсан ч үлдэнэ), энэ хувьсагч нь
  * зөвхөн хурдан кэш. Хоёулаа ҮРГЭЛЖ хамт шинэчлэгдэнэ.
+ *
+ * @type {string | null}
  */
-let memoryToken: string | null = null;
+let memoryToken = null;
 
-/** Backend-ээс ирдэг хэрэглэгчийн хэлбэр (Header, Catalog, Cart ашиглана). */
-export type User = {
-  id: number;
-  name: string;
-  email: string;
-  role: 'admin' | 'member' | string;
-  company?: { id: number; name: string } | null;
-};
+/**
+ * Backend-ээс ирдэг хэрэглэгчийн хэлбэр (Header, Catalog, Cart ашиглана).
+ *
+ * @typedef {object} User
+ * @property {number} id
+ * @property {string} name
+ * @property {string} email
+ * @property {'admin' | 'member' | string} role
+ * @property {{ id: number, name: string } | null} [company]
+ */
 
 // ---------------------------------------------------------------- token -----
 
-/** Апп асахад SecureStore-оос сэргээнэ. AuthProvider ганц удаа дуудна. */
-export async function loadToken(): Promise<string | null> {
+/**
+ * Апп асахад SecureStore-оос сэргээнэ. AuthProvider ганц удаа дуудна.
+ *
+ * @returns {Promise<string | null>}
+ */
+export async function loadToken() {
   memoryToken = await SecureStore.getItemAsync(TOKEN_KEY);
   return memoryToken;
 }
 
-/** Нэвтэрсний дараа: кэш + байнгын хадгалалт хоёуланг нь бичнэ. */
-export async function saveToken(token: string): Promise<void> {
+/**
+ * Нэвтэрсний дараа: кэш + байнгын хадгалалт хоёуланг нь бичнэ.
+ *
+ * @param {string} token
+ * @returns {Promise<void>}
+ */
+export async function saveToken(token) {
   memoryToken = token;
   await SecureStore.setItemAsync(TOKEN_KEY, token);
 }
 
-/** Гарах үед: хоёуланг нь цэвэрлэнэ. */
-export async function clearToken(): Promise<void> {
+/**
+ * Гарах үед: хоёуланг нь цэвэрлэнэ.
+ *
+ * @returns {Promise<void>}
+ */
+export async function clearToken() {
   memoryToken = null;
   await SecureStore.deleteItemAsync(TOKEN_KEY);
 }
@@ -70,25 +91,31 @@ export async function clearToken(): Promise<void> {
 // Хэрэглэгчийн мэдээлэл нууц биш ч, токентой хамт нэг газар байвал
 // "нэвтэрсэн эсэх" төлөв нь нэг л эх сурвалжтай болно.
 
-export async function loadStoredUser(): Promise<User | null> {
+/** @returns {Promise<User | null>} */
+export async function loadStoredUser() {
   const raw = await SecureStore.getItemAsync(USER_KEY);
   if (!raw) return null;
 
   // Хадгалсан JSON эвдэрсэн байвал (хувилбар солигдох гэх мэт) апп
   // асахдаа унахын оронд "нэвтрээгүй" гэж үзнэ.
   try {
-    return JSON.parse(raw) as User;
+    return JSON.parse(raw);
   } catch {
     await SecureStore.deleteItemAsync(USER_KEY);
     return null;
   }
 }
 
-export async function saveStoredUser(user: User): Promise<void> {
+/**
+ * @param {User} user
+ * @returns {Promise<void>}
+ */
+export async function saveStoredUser(user) {
   await SecureStore.setItemAsync(USER_KEY, JSON.stringify(user));
 }
 
-export async function clearStoredUser(): Promise<void> {
+/** @returns {Promise<void>} */
+export async function clearStoredUser() {
   await SecureStore.deleteItemAsync(USER_KEY);
 }
 
@@ -135,15 +162,19 @@ export default client;
  * байсан. Утсан дээр нэмэлт тохиолдол бий: сүлжээ огт байхгүй, эсвэл .env дэх
  * IP буруу — тэр үед err.response нь undefined байна (сервер хариу огт өгөөгүй).
  * Тэр тохиолдолд "Backend асаалттай юу?" гэхээс илүү тодорхой зөвлөгөө хэрэгтэй.
+ *
+ * @param {unknown} err
+ * @param {string} [fallback]
+ * @returns {string}
  */
-export function apiError(err: unknown, fallback = 'Алдаа гарлаа.'): string {
+export function apiError(err, fallback = 'Алдаа гарлаа.') {
   if (isAxiosError(err)) {
     // Сервер хариулсан — Laravel-ийн мессежийг харуулна.
     if (err.response) {
       if (err.response.status === 401) {
         return 'Нэвтрэх хугацаа дууссан байна. Дахин нэвтэрнэ үү.';
       }
-      return (err.response.data as { message?: string })?.message ?? fallback;
+      return err.response.data?.message ?? fallback;
     }
 
     // Сервер хариулаагүй — хаяг/сүлжээний асуудал.

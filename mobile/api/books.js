@@ -5,33 +5,46 @@
  * тус тусад нь бичигдсэн байсан. Зээлэх огноо тооцоолох 3 мөр ч мөн адил.
  * Утсан дээр эхнээс нь нэг газар төвлөрүүлье — API-ийн хариу өөрчлөгдвөл
  * НЭГ файл засахад хангалттай.
+ *
+ * ЭНЭ ФАЙЛ .js — тип нь JSDoc тайлбар дотор амьдарна (client.js-тэй ижил).
  */
 
 import client from './client';
 
-/** Жагсаалтад харагдах ном (BookResource). */
-export type Book = {
-  id: number;
-  title: string;
-  author: string;
-  category: string;
-  company: string | null;
-  available: number;
-  cover_url: string | null;
-};
+/**
+ * Жагсаалтад харагдах ном (BookResource).
+ *
+ * @typedef {object} Book
+ * @property {number} id
+ * @property {string} title
+ * @property {string} author
+ * @property {string} category
+ * @property {string | null} company
+ * @property {number} available
+ * @property {string | null} cover_url
+ */
 
-/** Дэлгэрэнгүй хуудасны ном (BookDetailResource) — дээрхээс илүү талбартай. */
-export type BookDetail = Book & {
-  isbn: string | null;
-  authors: string[];
-  total: number | null;
-};
+/**
+ * Дэлгэрэнгүй хуудасны ном (BookDetailResource) — дээрхээс илүү талбартай.
+ *
+ * `&` нь TS-ийн intersection-тай яг ижил утгатай: Book-ийн бүх талбар дээр
+ * нэмээд эдгээр гурав.
+ *
+ * @typedef {Book & {
+ *   isbn: string | null,
+ *   authors: string[],
+ *   total: number | null,
+ * }} BookDetail
+ */
 
 /**
  * API-ийн ном → UI-д хэрэгтэй энгийн бүтэц.
  * BookResource: { authors: ["Нэр"], category: "Нэр", available: N }
+ *
+ * @param {any} raw
+ * @returns {Book}
  */
-export function normalizeBook(raw: any): Book {
+export function normalizeBook(raw) {
   return {
     id: raw.id,
     title: raw.title,
@@ -48,9 +61,13 @@ export function normalizeBook(raw: any): Book {
  *
  * `??`-ууд нь хуучин түүхий загварын хэлбэрийг ч дэмжсэн хэвээр — кэш эсвэл
  * хуучин хариу ирвэл ч эвдрэхгүй (веб хувилбартай ижил бодлого).
+ *
+ * @param {any} raw
+ * @returns {BookDetail}
  */
-export function normalizeBookDetail(raw: any): BookDetail {
-  const authors: string[] = (raw.authors ?? []).map((a: any) => a?.name ?? a);
+export function normalizeBookDetail(raw) {
+  /** @type {string[]} */
+  const authors = (raw.authors ?? []).map((/** @type {any} */ a) => a?.name ?? a);
 
   return {
     id: raw.id,
@@ -66,8 +83,12 @@ export function normalizeBookDetail(raw: any): BookDetail {
   };
 }
 
-/** Зээлийн хугацаа: өнөөдрөөс хойш 14 хоног, "YYYY-MM-DD" хэлбэрээр. */
-export function dueDateIn14Days(): string {
+/**
+ * Зээлийн хугацаа: өнөөдрөөс хойш 14 хоног, "YYYY-MM-DD" хэлбэрээр.
+ *
+ * @returns {string}
+ */
+export function dueDateIn14Days() {
   const due = new Date();
   due.setDate(due.getDate() + 14);
 
@@ -84,8 +105,11 @@ export function dueDateIn14Days(): string {
  * АНХААР: backend нь энэ хүсэлтийг queue руу оруулаад 202 Accepted буцаадаг
  * (CreateLoanJob). Өөрөөр хэлбэл "хүлээж авлаа" гэсэн үг болохоос "хийгдлээ"
  * гэсэн үг биш — тиймээс зээлсэн ном "Миний зээл" дээр шууд гарч ирэхгүй.
+ *
+ * @param {number} bookId
+ * @returns {Promise<string>}
  */
-export async function borrowBook(bookId: number): Promise<string> {
+export async function borrowBook(bookId) {
   const dueDate = dueDateIn14Days();
   await client.post('/loans', { book_id: bookId, due_date: dueDate });
   return dueDate;

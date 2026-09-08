@@ -78,8 +78,15 @@ services:
       MAIL_PASSWORD: ""
       MAIL_ENCRYPTION: ""
 
-    # entrypoint нь тохиргоог хийгээд, дараа нь доорх command-ыг exec хийнэ.
-    entrypoint: ["bash", "initial.sh"]
+    # entrypoint ЗААГААГҮЙ нь санаатай.
+    #
+    # backend/initial.sh нь PROD-ын скрипт: төгсгөлдөө `exec supervisord`
+    # дуудаж, доорх command-ыг үл тоомсорлодог. Мөн тэр скрипт nginx асаах
+    # гэж оролддог — dev image дотор nginx СУУЛГААГҮЙ (Dockerfile-ийн nginx
+    # суулгалт зөвхөн prod шатанд).
+    #
+    # Тиймээс dev нь ямар ч entrypoint-гүйгээр доорх command-ыг шууд ажиллуулна.
+    #
     # `php artisan serve` БИШ гэдгийг анхаар.
     #
     # ServeCommand нь HTTP хүсэлт боловсруулдаг хүүхэд процесс руу зөвхөн
@@ -131,8 +138,9 @@ services:
     # ажлаа дуусгадаг. 10 секундын анхдагч хугацаа CreateLoanJob-д хүрэлцэхгүй
     # байж болзошгүй тул уртасгав — эс бөгөөс ажил дундуураа тасарна.
     stop_grace_period: 30s
-    # Backend-тэй ижил entrypoint, зөвхөн command нь өөр.
-    entrypoint: ["bash", "initial.sh"]
+    # backend-тэй ижил шалтгаанаар entrypoint байхгүй (дээрх тайлбарыг үз).
+    # Миграцыг backend бус, гараар ажиллуулна:
+    #   docker compose exec backend php artisan migrate --force
     command: ["php", "artisan", "queue:work", "--tries=3", "--backoff=5"]
     env_file:
       - ./backend/.env
@@ -268,7 +276,9 @@ services:
       MAIL_HOST: mailpit
       MAIL_PORT: 1025
     ports:
-      # dev backend нь 8000-г эзэлсэн тул 8001 руу гаргав.
+      # dev backend нь 8000-г эзэлсэн тул 8001 руу гаргав. Контейнер дотор
+      # nginx нь 8000 сонсох тул баруун тал нь 8000 хэвээр — дээрх
+      # APP_URL: http://localhost:8001 нь хостоос харагдах хаяг.
       - "8001:8000"
     depends_on:
       db:

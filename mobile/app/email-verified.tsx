@@ -50,7 +50,6 @@ const MESSAGES = {
 } as const;
 
 export default function EmailVerifiedScreen() {
-  // ?status=success | already | error
   // Веб дээр useSearchParams() байсан; expo-router-т замын болон query
   // параметрийг НЭГ hook-оор уншина.
   const { status } = useLocalSearchParams<{ status?: string }>();
